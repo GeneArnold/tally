@@ -14,6 +14,7 @@ export async function POST(request: Request) {
   }
 
   try {
+    // Create the food (no tags in JSON — tags go via junction)
     const res = await fetch(`${DIRECTUS_URL}/items/nx_foods`, {
       method: 'POST',
       headers: {
@@ -34,7 +35,6 @@ export async function POST(request: Request) {
         fiber_g: body.fiber_g || null,
         sugar_g: body.sugar_g || null,
         sodium_mg: body.sodium_mg || null,
-        tags: body.tags || null,
         source: body.source || 'manual',
       }),
     });
@@ -45,6 +45,25 @@ export async function POST(request: Request) {
     }
 
     const data = await res.json();
+    const foodId = data.data.id;
+
+    // Create junction records for tags
+    const tagIds = body.tag_ids as string[] | undefined;
+    if (tagIds && tagIds.length > 0) {
+      const junctionRecords = tagIds.map((tagId: string) => ({
+        nx_foods_id: foodId,
+        nx_food_tags_id: tagId,
+      }));
+      await fetch(`${DIRECTUS_URL}/items/nx_foods_nx_food_tags`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${session.token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(junctionRecords),
+      });
+    }
+
     return NextResponse.json({ food: data.data });
   } catch (err) {
     return NextResponse.json(

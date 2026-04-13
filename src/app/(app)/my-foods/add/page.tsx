@@ -292,7 +292,7 @@ export default function AddFoodPage() {
           sugar_g: form.sugar_g ? parseFloat(form.sugar_g) : null,
           sodium_mg: form.sodium_mg ? parseFloat(form.sodium_mg) : null,
           cholesterol_mg: form.cholesterol_mg ? parseFloat(form.cholesterol_mg) : null,
-          tags: formTags.length > 0 ? formTags : null,
+          tag_ids: formTags,
           source: form.barcode ? 'usda' : 'manual',
         }),
       });
@@ -801,7 +801,7 @@ export default function AddFoodPage() {
           </div>
         </div>
 
-        <TagPicker selected={formTags} onChange={setFormTags} />
+        <TagPicker selectedIds={formTags} onChange={setFormTags} />
 
         {form.barcode && (
           <p className="text-xs text-gray-400">Barcode: {form.barcode}</p>

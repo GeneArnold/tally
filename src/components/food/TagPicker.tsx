@@ -10,11 +10,11 @@ interface TagData {
 }
 
 interface Props {
-  selected: string[];
-  onChange: (tags: string[]) => void;
+  selectedIds: string[];
+  onChange: (tagIds: string[]) => void;
 }
 
-export default function TagPicker({ selected, onChange }: Props) {
+export default function TagPicker({ selectedIds, onChange }: Props) {
   const [tags, setTags] = useState<TagData[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [expanded, setExpanded] = useState(false);
@@ -36,11 +36,11 @@ export default function TagPicker({ selected, onChange }: Props) {
     loadTags();
   }, []);
 
-  function toggle(tagName: string) {
-    if (selected.includes(tagName)) {
-      onChange(selected.filter((t) => t !== tagName));
+  function toggle(tagId: string) {
+    if (selectedIds.includes(tagId)) {
+      onChange(selectedIds.filter((id) => id !== tagId));
     } else {
-      onChange([...selected, tagName]);
+      onChange([...selectedIds, tagId]);
     }
   }
 
@@ -55,7 +55,7 @@ export default function TagPicker({ selected, onChange }: Props) {
     );
   }
 
-  const selectedTags = tags.filter((t) => selected.includes(t.name));
+  const selectedTags = tags.filter((t) => selectedIds.includes(t.id));
 
   // Collapsed: show selected tags + expand button
   if (!expanded) {
@@ -103,12 +103,12 @@ export default function TagPicker({ selected, onChange }: Props) {
       <div className="bg-gray-50 rounded-xl p-3 border border-gray-200">
         <div className="flex flex-wrap gap-2">
           {tags.map((tag) => {
-            const isSelected = selected.includes(tag.name);
+            const isSelected = selectedIds.includes(tag.id);
             return (
               <button
                 key={tag.id}
                 type="button"
-                onClick={() => toggle(tag.name)}
+                onClick={() => toggle(tag.id)}
                 className={`rounded-full px-3 py-1.5 text-sm font-medium min-h-[36px] transition-all ${
                   isSelected
                     ? 'text-white shadow-sm'
@@ -121,8 +121,8 @@ export default function TagPicker({ selected, onChange }: Props) {
             );
           })}
         </div>
-        {selected.length > 0 && (
-          <p className="text-xs text-gray-400 mt-2">{selected.length} selected</p>
+        {selectedIds.length > 0 && (
+          <p className="text-xs text-gray-400 mt-2">{selectedIds.length} selected</p>
         )}
       </div>
     </div>

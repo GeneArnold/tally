@@ -24,12 +24,15 @@ export default async function FoodDetailPage({ params, searchParams }: Props) {
   const backLabel = from?.startsWith('/diary') ? 'Back to Diary' : 'My Foods';
 
   const res = await fetch(
-    `${DIRECTUS_URL}/items/nx_foods/${id}?fields=*`,
+    `${DIRECTUS_URL}/items/nx_foods/${id}?fields=*,food_tags.nx_food_tags_id.id,food_tags.nx_food_tags_id.name,food_tags.nx_food_tags_id.color`,
     { headers: { Authorization: `Bearer ${session.token}` } },
   );
 
   if (!res.ok) redirect('/my-foods');
   const { data: food } = await res.json();
+
+  // Flatten M2M tags
+  const foodTags = (food.food_tags || []).map((t: { nx_food_tags_id: { id: string; name: string; color: string } }) => t.nx_food_tags_id).filter(Boolean);
 
   return (
     <div>
@@ -75,10 +78,10 @@ export default async function FoodDetailPage({ params, searchParams }: Props) {
         </div>
       </div>
 
-      {food.tags && food.tags.length > 0 && (
+      {foodTags.length > 0 && (
         <div className="mt-4 flex gap-2 flex-wrap">
-          {food.tags.map((tag: string) => (
-            <span key={tag} className="bg-gray-100 text-gray-600 text-sm rounded-full px-3 py-1">{tag}</span>
+          {foodTags.map((tag: { id: string; name: string; color: string }) => (
+            <span key={tag.id} className="text-sm rounded-full px-3 py-1 text-white" style={{ backgroundColor: tag.color || '#3B82F6' }}>{tag.name}</span>
           ))}
         </div>
       )}

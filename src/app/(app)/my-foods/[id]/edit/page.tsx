@@ -56,7 +56,7 @@ export default function EditFoodPage() {
           sodium_mg: f.sodium_mg?.toString() || '',
           cholesterol_mg: f.cholesterol_mg?.toString() || '',
         });
-        setEditTags(Array.isArray(f.tags) ? f.tags : []);
+        setEditTags(Array.isArray(f.tag_ids) ? f.tag_ids : []);
       } catch {
         router.push('/my-foods');
       } finally {
@@ -97,7 +97,7 @@ export default function EditFoodPage() {
           sugar_g: form.sugar_g ? parseFloat(form.sugar_g) : null,
           sodium_mg: form.sodium_mg ? parseFloat(form.sodium_mg) : null,
           cholesterol_mg: form.cholesterol_mg ? parseFloat(form.cholesterol_mg) : null,
-          tags: editTags.length > 0 ? editTags : null,
+          tag_ids: editTags,
         }),
       });
 
@@ -199,7 +199,7 @@ export default function EditFoodPage() {
           </div>
         </div>
 
-        <TagPicker selected={editTags} onChange={setEditTags} />
+        <TagPicker selectedIds={editTags} onChange={setEditTags} />
 
         {form.barcode && (
           <div>

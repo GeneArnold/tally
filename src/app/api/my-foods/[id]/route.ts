@@ -9,16 +9,23 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
 
   const { id } = await params;
 
-  const res = await fetch(`${DIRECTUS_URL}/items/nx_foods/${id}?fields=*`, {
-    headers: { Authorization: `Bearer ${session.token}` },
-  });
+  const res = await fetch(
+    `${DIRECTUS_URL}/items/nx_foods/${id}?fields=*,food_tags.id,food_tags.nx_food_tags_id.id,food_tags.nx_food_tags_id.name,food_tags.nx_food_tags_id.color`,
+    { headers: { Authorization: `Bearer ${session.token}` } },
+  );
 
-  if (!res.ok) {
-    return NextResponse.json({ error: 'Food not found' }, { status: 404 });
-  }
+  if (!res.ok) return NextResponse.json({ error: 'Food not found' }, { status: 404 });
 
   const data = await res.json();
-  return NextResponse.json({ food: data.data });
+  const food = data.data;
+
+  // Flatten M2M tags
+  const foodTags = food.food_tags as { id: number; nx_food_tags_id: { id: string; name: string; color: string } }[] || [];
+  food.tag_ids = foodTags.map((t) => t.nx_food_tags_id?.id).filter(Boolean);
+  food.tag_names = foodTags.map((t) => t.nx_food_tags_id?.name).filter(Boolean);
+  food.tag_objects = foodTags.map((t) => t.nx_food_tags_id).filter(Boolean);
+
+  return NextResponse.json({ food });
 }
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -28,20 +35,64 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   const { id } = await params;
   const body = await request.json();
 
-  const res = await fetch(`${DIRECTUS_URL}/items/nx_foods/${id}`, {
-    method: 'PATCH',
-    headers: {
-      Authorization: `Bearer ${session.token}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(body),
-  });
+  // Separate tag_ids from other fields
+  const { tag_ids, ...foodFields } = body;
 
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    return NextResponse.json({ error: err.errors?.[0]?.message || 'Failed to update' }, { status: 500 });
+  // Update food fields
+  if (Object.keys(foodFields).length > 0) {
+    const res = await fetch(`${DIRECTUS_URL}/items/nx_foods/${id}`, {
+      method: 'PATCH',
+      headers: {
+        Authorization: `Bearer ${session.token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(foodFields),
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      return NextResponse.json({ error: err.errors?.[0]?.message || 'Failed to update' }, { status: 500 });
+    }
   }
 
-  const data = await res.json();
-  return NextResponse.json({ food: data.data });
+  // Update tags via junction if tag_ids provided
+  if (tag_ids !== undefined) {
+    // Delete existing junction records for this food
+    const existingRes = await fetch(
+      `${DIRECTUS_URL}/items/nx_foods_nx_food_tags?filter[nx_foods_id][_eq]=${id}&fields=id`,
+      { headers: { Authorization: `Bearer ${session.token}` } },
+    );
+    if (existingRes.ok) {
+      const existingData = await existingRes.json();
+      const existingIds = (existingData.data || []).map((r: { id: number }) => r.id);
+      if (existingIds.length > 0) {
+        await fetch(`${DIRECTUS_URL}/items/nx_foods_nx_food_tags`, {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${session.token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(existingIds),
+        });
+      }
+    }
+
+    // Create new junction records
+    if (tag_ids.length > 0) {
+      const junctionRecords = tag_ids.map((tagId: string) => ({
+        nx_foods_id: id,
+        nx_food_tags_id: tagId,
+      }));
+      await fetch(`${DIRECTUS_URL}/items/nx_foods_nx_food_tags`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${session.token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(junctionRecords),
+      });
+    }
+  }
+
+  return NextResponse.json({ success: true });
 }

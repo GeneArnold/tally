@@ -14,7 +14,7 @@ interface Food {
   fat_g: number | null;
   default_serving_size: number | null;
   default_serving_unit: string | null;
-  tags: string[] | null;
+  tags: { id: string; name: string; color: string | null }[] | null;
 }
 
 export default function MyFoodsPage() {
@@ -135,7 +135,7 @@ export default function MyFoodsPage() {
               {food.tags && food.tags.length > 0 && (
                 <div className="flex gap-1 mt-2 flex-wrap">
                   {food.tags.map((tag) => (
-                    <span key={tag} className="bg-gray-100 text-gray-500 text-xs rounded-full px-2 py-0.5">{tag}</span>
+                    <span key={tag.id} className="text-xs rounded-full px-2 py-0.5 text-white" style={{ backgroundColor: tag.color || '#3B82F6' }}>{tag.name}</span>
                   ))}
                 </div>
               )}
