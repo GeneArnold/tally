@@ -1,0 +1,15 @@
+services:
+  nexus-health:
+    build: .
+    container_name: nexus-health
+    restart: unless-stopped
+    ports:
+      - "8060:3000"
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/login"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s

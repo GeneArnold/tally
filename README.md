@@ -1,36 +1,60 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Nexus Health
 
-## Getting Started
+Mobile-first PWA for health and nutrition tracking. Part of the Nexus ecosystem.
 
-First, run the development server:
+## Quick Commands
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# Start
+docker compose up -d
+
+# Stop
+docker compose down
+
+# Rebuild after code changes
+docker compose up -d --build
+
+# View logs
+docker logs nexus-health --tail 50
+docker logs -f nexus-health
+
+# Restart
+docker compose restart
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Configuration
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Environment variables in `.env`:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Variable | Description |
+|---|---|
+| `NEXT_PUBLIC_DIRECTUS_URL` | Directus URL (production: `http://192.168.40.51:8057`) |
+| `DIRECTUS_URL` | Server-side Directus URL |
+| `USDA_API_KEY` | USDA FoodData Central API key |
+| `GROQ_API_KEY` | Groq API key (free, text parsing) |
+| `GEMINI_API_KEY` | Google Gemini API key (free tier, vision) |
+| `ANTHROPIC_API_KEY` | Anthropic API key (optional fallback) |
+| `COOKIE_SECURE` | Set to `true` when behind HTTPS proxy |
 
-## Learn More
+## Port
 
-To learn more about Next.js, take a look at the following resources:
+- **External:** 8060
+- **Internal:** 3000
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Health Check
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+curl http://192.168.40.51:8060/login
+```
 
-## Deploy on Vercel
+## Deployment from Dev Machine
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+# From novalab (192.168.40.30)
+rsync -avz --exclude node_modules --exclude .next --exclude .git --exclude .env.local \
+  /home/genearnold/Workspace/health-app/ \
+  garnold@192.168.40.51:/opt/docker_deploy/nexus-health/
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+# Then on nexus
+ssh garnold@192.168.40.51 "cd /opt/docker_deploy/nexus-health && docker compose up -d --build"
+```
