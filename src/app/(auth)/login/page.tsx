@@ -46,7 +46,7 @@ function LoginForm() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <img src="/nexus-logo.png" alt="Nexus Health" className="w-20 h-20 mx-auto mb-3 rounded-2xl" />
+          <img src="/nexus-logo.png" alt="Nexus Health" className="w-64 h-64 mx-auto mb-4 rounded-3xl" />
           <h1 className="text-3xl font-bold text-gray-900">Nexus Health</h1>
           <p className="text-gray-600 mt-2 text-base">Sign in to your account</p>
         </div>

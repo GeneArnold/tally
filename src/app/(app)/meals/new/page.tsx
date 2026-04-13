@@ -108,7 +108,7 @@ export default function NewMealPage() {
         return;
       }
 
-      router.push('/meals');
+      window.location.href = '/meals';
     } catch {
       setError('Failed to create meal');
       setSaving(false);
