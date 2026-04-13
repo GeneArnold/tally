@@ -59,7 +59,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   if (tag_ids !== undefined) {
     // Delete existing junction records one by one
     const existingRes = await fetch(
-      `${DIRECTUS_URL}/items/nx_foods_nx_food_tags?filter[nx_foods_id][_eq]=${id}&fields=id&limit=-1`,
+      `${DIRECTUS_URL}/items/nx_foods_nx_food_tags?filter[nx_foods_id][_eq]=${id}&fields=id&limit=100`,
       { headers: { Authorization: `Bearer ${session.token}` } },
     );
     if (existingRes.ok) {

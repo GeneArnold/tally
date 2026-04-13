@@ -186,17 +186,21 @@ export default function MealDetailPage() {
           selectedIds={mealTags}
           onChange={(newTags) => setMealTags(newTags)}
         />
-        {JSON.stringify(mealTags) !== JSON.stringify(meal.tag_ids || []) && (
+        {JSON.stringify(mealTags.sort()) !== JSON.stringify((meal.tag_ids || []).sort()) && (
           <button
             onClick={async () => {
               setSavingTags(true);
               try {
-                await fetch(`/api/meals/${mealId}`, {
+                const res = await fetch(`/api/meals/${mealId}`, {
                   method: 'PATCH',
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({ tag_ids: mealTags }),
                 });
-                await loadMeal();
+                if (res.ok) {
+                  // Update local meal state to match what we just saved
+                  // Don't reload — trust the save
+                  setMeal((prev) => prev ? { ...prev, tag_ids: [...mealTags] } : prev);
+                }
               } catch {
                 // Silent
               } finally {

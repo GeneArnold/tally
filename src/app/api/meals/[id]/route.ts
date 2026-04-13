@@ -53,7 +53,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   if (tag_ids !== undefined) {
     // Delete existing junction records one by one (Directus batch delete needs IDs in URL)
     const existingRes = await fetch(
-      `${DIRECTUS_URL}/items/nx_meals_nx_food_tags?filter[nx_meals_id][_eq]=${id}&fields=id&limit=-1`,
+      `${DIRECTUS_URL}/items/nx_meals_nx_food_tags?filter[nx_meals_id][_eq]=${id}&fields=id&limit=100`,
       { headers: { Authorization: `Bearer ${session.token}` } },
     );
     if (existingRes.ok) {
