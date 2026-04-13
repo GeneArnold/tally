@@ -39,6 +39,7 @@ function AddFoodForm() {
     try {
       const params = new URLSearchParams();
       if (query) params.set('q', query);
+      params.set('_t', Date.now().toString());
       const res = await fetch(`/api/my-foods?${params}`);
       if (!res.ok) throw new Error('Failed to fetch');
       const data = await res.json();

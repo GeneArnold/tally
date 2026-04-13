@@ -39,6 +39,7 @@ export default function NewMealPage() {
     try {
       const params = new URLSearchParams();
       if (query) params.set('q', query);
+      params.set('_t', Date.now().toString());
       const res = await fetch(`/api/my-foods?${params}`);
       if (res.ok) {
         const data = await res.json();

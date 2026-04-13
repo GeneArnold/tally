@@ -35,6 +35,7 @@ export default function AddFoodsToMealPage() {
     try {
       const p = new URLSearchParams();
       if (query) p.set('q', query);
+      p.set('_t', Date.now().toString());
       const res = await fetch(`/api/my-foods?${p}`);
       if (res.ok) {
         const data = await res.json();

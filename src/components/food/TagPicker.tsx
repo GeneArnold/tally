@@ -22,7 +22,7 @@ export default function TagPicker({ selectedIds, onChange }: Props) {
   useEffect(() => {
     async function loadTags() {
       try {
-        const res = await fetch('/api/tags');
+        const res = await fetch(`/api/tags?_t=${Date.now()}`);
         if (res.ok) {
           const data = await res.json();
           setTags(data.tags || []);
