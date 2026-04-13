@@ -51,21 +51,22 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 
   // Update tags via junction if provided
   if (tag_ids !== undefined) {
+    // Delete existing junction records one by one (Directus batch delete needs IDs in URL)
     const existingRes = await fetch(
-      `${DIRECTUS_URL}/items/nx_meals_nx_food_tags?filter[nx_meals_id][_eq]=${id}&fields=id`,
+      `${DIRECTUS_URL}/items/nx_meals_nx_food_tags?filter[nx_meals_id][_eq]=${id}&fields=id&limit=-1`,
       { headers: { Authorization: `Bearer ${session.token}` } },
     );
     if (existingRes.ok) {
       const existingData = await existingRes.json();
       const existingIds = (existingData.data || []).map((r: { id: number }) => r.id);
-      if (existingIds.length > 0) {
-        await fetch(`${DIRECTUS_URL}/items/nx_meals_nx_food_tags`, {
+      for (const eid of existingIds) {
+        await fetch(`${DIRECTUS_URL}/items/nx_meals_nx_food_tags/${eid}`, {
           method: 'DELETE',
-          headers: { Authorization: `Bearer ${session.token}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify(existingIds),
+          headers: { Authorization: `Bearer ${session.token}` },
         });
       }
     }
+    // Create new junction records
     if (tag_ids.length > 0) {
       await fetch(`${DIRECTUS_URL}/items/nx_meals_nx_food_tags`, {
         method: 'POST',

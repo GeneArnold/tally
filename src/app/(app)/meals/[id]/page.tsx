@@ -27,6 +27,8 @@ interface Meal {
   description: string | null;
   default_meal_type: string | null;
   items: MealItem[];
+  tag_ids?: string[];
+  tag_objects?: { id: string; name: string; color: string }[];
 }
 
 export default function MealDetailPage() {
@@ -182,23 +184,31 @@ export default function MealDetailPage() {
       <div className="bg-white rounded-2xl p-4 shadow-sm mb-4">
         <TagPicker
           selectedIds={mealTags}
-          onChange={async (newTags) => {
-            setMealTags(newTags);
-            setSavingTags(true);
-            try {
-              await fetch(`/api/meals/${mealId}`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ tag_ids: newTags }),
-              });
-            } catch {
-              // Silent
-            } finally {
-              setSavingTags(false);
-            }
-          }}
+          onChange={(newTags) => setMealTags(newTags)}
         />
-        {savingTags && <p className="text-xs text-gray-400 mt-1">Saving tags...</p>}
+        {JSON.stringify(mealTags) !== JSON.stringify(meal.tag_ids || []) && (
+          <button
+            onClick={async () => {
+              setSavingTags(true);
+              try {
+                await fetch(`/api/meals/${mealId}`, {
+                  method: 'PATCH',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ tag_ids: mealTags }),
+                });
+                await loadMeal();
+              } catch {
+                // Silent
+              } finally {
+                setSavingTags(false);
+              }
+            }}
+            disabled={savingTags}
+            className="mt-3 w-full bg-blue-600 text-white rounded-lg px-4 py-2.5 text-sm font-semibold active:bg-blue-800 disabled:opacity-50 min-h-[44px]"
+          >
+            {savingTags ? 'Saving...' : 'Save Tags'}
+          </button>
+        )}
       </div>
 
       {/* Food list */}
