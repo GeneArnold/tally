@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { MEAL_TYPES } from '@/lib/constants';
 import DiaryFoodEntry from '@/components/diary/DiaryFoodEntry';
+import DiaryDateNav from '@/components/diary/DiaryDateNav';
 
 export const dynamic = 'force-dynamic';
 
@@ -114,20 +115,14 @@ export default async function DiaryDatePage({ params }: Props) {
   return (
     <div>
       {/* Date nav */}
-      <div className="flex items-center justify-between mb-4">
-        <Link href={`/diary/${prevStr}`} className="text-blue-600 font-medium min-w-[44px] min-h-[44px] flex items-center">
-          &larr; Prev
-        </Link>
-        <div className="text-center">
-          <h1 className="text-lg font-bold text-gray-900">
-            {isToday ? 'Today' : d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
-          </h1>
-          <p className="text-xs text-gray-500">{`${String(month).padStart(2, '0')}/${String(day).padStart(2, '0')}/${year}`}</p>
-        </div>
-        <Link href={`/diary/${nextStr}`} className="text-blue-600 font-medium min-w-[44px] min-h-[44px] flex items-center">
-          Next &rarr;
-        </Link>
-      </div>
+      <DiaryDateNav
+        date={date}
+        prevDate={prevStr}
+        nextDate={nextStr}
+        isToday={isToday}
+        displayLabel={isToday ? 'Today' : d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+        displayDate={`${String(month).padStart(2, '0')}/${String(day).padStart(2, '0')}/${year}`}
+      />
 
       {/* Day totals */}
       {dayCal > 0 && (
