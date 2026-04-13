@@ -21,7 +21,7 @@ export default function MyFoodsPage() {
   const [foods, setFoods] = useState<Food[]>([]);
   const [search, setSearch] = useState('');
   const [tagFilter, setTagFilter] = useState('');
-  const [allTags, setAllTags] = useState<string[]>([]);
+  const [allTags, setAllTags] = useState<{ name: string; color: string | null }[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchFoods = useCallback(async () => {
@@ -86,14 +86,15 @@ export default function MyFoodsPage() {
           </button>
           {allTags.map((tag) => (
             <button
-              key={tag}
-              onClick={() => setTagFilter(tagFilter === tag ? '' : tag)}
-              className={`shrink-0 rounded-full px-3 py-1.5 text-sm font-medium min-h-[36px] flex items-center gap-1 ${
-                tagFilter === tag ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600'
-              }`}
+              key={tag.name}
+              onClick={() => setTagFilter(tagFilter === tag.name ? '' : tag.name)}
+              className={`shrink-0 rounded-full px-3 py-1.5 text-sm font-medium min-h-[36px] text-white`}
+              style={{
+                backgroundColor: tagFilter === tag.name ? (tag.color || '#3B82F6') : undefined,
+                ...(tagFilter !== tag.name ? { backgroundColor: '#f3f4f6', color: '#4b5563' } : {}),
+              }}
             >
-              <Tag size={12} />
-              {tag}
+              {tag.name}
             </button>
           ))}
         </div>

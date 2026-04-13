@@ -40,16 +40,20 @@ export async function GET(request: Request) {
       });
     }
 
-    // Collect all unique tags
-    const tagSet = new Set<string>();
-    for (const f of data.data || []) {
-      const tags = f.tags as string[] | null;
-      if (tags) tags.forEach((t: string) => tagSet.add(t));
+    // Get user's tags from nx_food_tags (not from food-level tags)
+    const tagsRes = await fetch(
+      `${DIRECTUS_URL}/items/nx_food_tags?filter[user][_eq]=${session.user.id}&fields=name,color&sort=sort,name&limit=100`,
+      { headers: { Authorization: `Bearer ${session.token}` } },
+    );
+    let userTags: { name: string; color: string | null }[] = [];
+    if (tagsRes.ok) {
+      const tagsData = await tagsRes.json();
+      userTags = tagsData.data || [];
     }
 
     return NextResponse.json({
       foods,
-      tags: Array.from(tagSet).sort(),
+      tags: userTags,
       total: foods.length,
     });
   } catch (err) {

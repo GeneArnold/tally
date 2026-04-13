@@ -109,6 +109,8 @@ export default function EditFoodPage() {
       }
 
       setSaved(true);
+      // Reload after brief delay so user sees "Saved!"
+      setTimeout(() => { window.location.href = `/my-foods/${foodId}`; }, 800);
     } catch {
       setError('Failed to save');
     } finally {
