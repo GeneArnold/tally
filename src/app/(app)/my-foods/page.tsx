@@ -31,6 +31,7 @@ export default function MyFoodsPage() {
       if (search) params.set('q', search);
       if (tagFilters.length > 0) params.set('tags', tagFilters.join(','));
 
+      params.set('_t', Date.now().toString());
       const res = await fetch(`/api/my-foods?${params}`);
       if (!res.ok) throw new Error('Failed to fetch');
       const data = await res.json();

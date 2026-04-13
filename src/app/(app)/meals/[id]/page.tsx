@@ -47,7 +47,7 @@ export default function MealDetailPage() {
 
   async function loadMeal() {
     try {
-      const res = await fetch(`/api/meals/${mealId}`);
+      const res = await fetch(`/api/meals/${mealId}?_t=${Date.now()}`);
       if (res.ok) {
         const data = await res.json();
         setMeal(data.meal);

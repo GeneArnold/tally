@@ -53,7 +53,7 @@ export default function DiaryDatePage() {
     async function loadDiary() {
       setLoading(true);
       try {
-        const res = await fetch(`/api/diary/${date}`);
+        const res = await fetch(`/api/diary/${date}?_t=${Date.now()}`);
         if (res.ok) {
           const data = await res.json();
           setEntries(data.entries || []);

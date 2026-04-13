@@ -28,7 +28,7 @@ export default function MealsPage() {
   useEffect(() => {
     async function loadMeals() {
       try {
-        const res = await fetch('/api/meals');
+        const res = await fetch(`/api/meals?_t=${Date.now()}`);
         if (res.ok) {
           const data = await res.json();
           setMeals(data.meals || []);

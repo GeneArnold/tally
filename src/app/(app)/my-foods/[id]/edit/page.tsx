@@ -36,7 +36,7 @@ export default function EditFoodPage() {
   useEffect(() => {
     async function loadFood() {
       try {
-        const res = await fetch(`/api/my-foods/${foodId}`);
+        const res = await fetch(`/api/my-foods/${foodId}?_t=${Date.now()}`);
         if (!res.ok) { router.push('/my-foods'); return; }
         const data = await res.json();
         const f = data.food;

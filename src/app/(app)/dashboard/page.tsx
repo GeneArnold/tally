@@ -44,7 +44,7 @@ export default function DashboardPage() {
   useEffect(() => {
     async function load() {
       try {
-        const res = await fetch('/api/dashboard');
+        const res = await fetch(`/api/dashboard?_t=${Date.now()}`);
         if (res.ok) {
           setData(await res.json());
         }
