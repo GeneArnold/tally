@@ -40,6 +40,11 @@ export default function MealDetailPage() {
   const [loading, setLoading] = useState(true);
   const [mealTags, setMealTags] = useState<string[]>([]);
   const [savingTags, setSavingTags] = useState(false);
+  const [showEdit, setShowEdit] = useState(false);
+  const [editName, setEditName] = useState('');
+  const [editDesc, setEditDesc] = useState('');
+  const [editType, setEditType] = useState('');
+  const [savingEdit, setSavingEdit] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [showDeleteItem, setShowDeleteItem] = useState<string | null>(null);
@@ -155,9 +160,22 @@ export default function MealDetailPage() {
           <h1 className="text-xl font-bold text-gray-900">{meal.name}</h1>
           {meal.description && <p className="text-gray-500 text-sm mt-1">{meal.description}</p>}
         </div>
-        {meal.default_meal_type && (
-          <span className="text-xs bg-gray-100 text-gray-500 rounded-full px-2.5 py-1">{meal.default_meal_type}</span>
-        )}
+        <div className="flex items-center gap-2">
+          {meal.default_meal_type && (
+            <span className="text-xs bg-gray-100 text-gray-500 rounded-full px-2.5 py-1">{meal.default_meal_type}</span>
+          )}
+          <button
+            onClick={() => {
+              setEditName(meal.name);
+              setEditDesc(meal.description || '');
+              setEditType(meal.default_meal_type || '');
+              setShowEdit(true);
+            }}
+            className="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center active:bg-blue-200"
+          >
+            <Pencil size={16} className="text-blue-600" />
+          </button>
+        </div>
       </div>
 
       {/* Totals */}
@@ -309,9 +327,93 @@ export default function MealDetailPage() {
         onConfirm={() => showDeleteItem && handleDeleteItem(showDeleteItem)}
         onCancel={() => setShowDeleteItem(null)}
       />
+      {/* Edit meal sheet */}
+      {showEdit && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-end justify-center" onClick={() => setShowEdit(false)}>
+          <div className="bg-white rounded-t-2xl w-full max-w-lg p-6 pb-8" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="text-lg font-bold text-gray-900">Edit Meal</h3>
+              <button onClick={() => setShowEdit(false)} className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
+                <span className="text-gray-500 text-lg">&times;</span>
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Meal Name</label>
+                <input
+                  type="text"
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  className="w-full rounded-lg border-2 border-gray-300 px-4 py-3 text-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                <input
+                  type="text"
+                  value={editDesc}
+                  onChange={(e) => setEditDesc(e.target.value)}
+                  placeholder="Optional note about this meal"
+                  className="w-full rounded-lg border-2 border-gray-300 px-4 py-3 text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Default Meal Slot</label>
+                <select
+                  value={editType}
+                  onChange={(e) => setEditType(e.target.value)}
+                  className="w-full rounded-lg border-2 border-gray-300 px-4 py-3 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="">No default</option>
+                  {MEAL_TYPES.map((t) => (
+                    <option key={t} value={t}>{t}</option>
+                  ))}
+                </select>
+              </div>
+
+              <button
+                onClick={async () => {
+                  if (!editName.trim()) return;
+                  setSavingEdit(true);
+                  try {
+                    const res = await fetch(`/api/meals/${mealId}`, {
+                      method: 'PATCH',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        name: editName.trim(),
+                        description: editDesc.trim() || null,
+                        default_meal_type: editType || null,
+                      }),
+                    });
+                    if (res.ok) {
+                      setMeal((prev) => prev ? {
+                        ...prev,
+                        name: editName.trim(),
+                        description: editDesc.trim() || null,
+                        default_meal_type: editType || null,
+                      } : prev);
+                      setShowEdit(false);
+                    }
+                  } catch {
+                    // Silent
+                  } finally {
+                    setSavingEdit(false);
+                  }
+                }}
+                disabled={savingEdit || !editName.trim()}
+                className="w-full bg-blue-600 text-white rounded-lg px-4 py-3.5 text-base font-semibold active:bg-blue-800 disabled:opacity-50 min-h-[52px]"
+              >
+                {savingEdit ? 'Saving...' : 'Save Changes'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
-// Need Link import for the "Add more foods" link
 import Link from 'next/link';
