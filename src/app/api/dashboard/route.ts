@@ -38,7 +38,7 @@ export async function GET() {
     };
   }
 
-  return NextResponse.json({
+  const response = NextResponse.json({
     user: {
       first_name: session.user.first_name,
       last_name: session.user.last_name,
@@ -47,4 +47,7 @@ export async function GET() {
     totals,
     hasProfile: !!profile,
   });
+  response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+  response.headers.set('Pragma', 'no-cache');
+  return response;
 }

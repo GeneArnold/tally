@@ -30,5 +30,8 @@ export async function GET(_request: Request, { params }: { params: Promise<{ dat
   }
 
   const data = await res.json();
-  return NextResponse.json({ entries: data.data || [] });
+  const response = NextResponse.json({ entries: data.data || [] });
+  response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+  response.headers.set('Pragma', 'no-cache');
+  return response;
 }

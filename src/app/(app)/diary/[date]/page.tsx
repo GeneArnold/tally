@@ -67,19 +67,21 @@ export default function DiaryDatePage() {
     loadDiary();
   }, [date]);
 
-  // Merge entries for same meal
+  // Merge entries for same meal — stamp each food entry with its parent diary entry ID
   const entryMap = new Map<string, DiaryEntry>();
   for (const e of entries) {
     if (!e.diary_meal) continue;
+    // Tag each food entry with its actual diary entry ID
+    const taggedFoodEntries = e.food_entries.map((fe) => ({ ...fe, _diaryEntryId: e.id }));
     const existing = entryMap.get(e.diary_meal);
     if (existing) {
-      existing.food_entries = [...existing.food_entries, ...e.food_entries];
+      existing.food_entries = [...existing.food_entries, ...taggedFoodEntries];
       existing.total_calories = (existing.total_calories || 0) + (e.total_calories || 0);
       existing.total_protein_g = (existing.total_protein_g || 0) + (e.total_protein_g || 0);
       existing.total_carbs_g = (existing.total_carbs_g || 0) + (e.total_carbs_g || 0);
       existing.total_fat_g = (existing.total_fat_g || 0) + (e.total_fat_g || 0);
     } else {
-      entryMap.set(e.diary_meal, { ...e, food_entries: [...e.food_entries] });
+      entryMap.set(e.diary_meal, { ...e, food_entries: taggedFoodEntries });
     }
   }
 
@@ -157,7 +159,7 @@ export default function DiaryDatePage() {
                 {foodEntries.length > 0 && (
                   <div className="divide-y divide-gray-50">
                     {foodEntries.map((fe) => (
-                      <DiaryFoodEntry key={fe.id} entry={fe} diaryEntryId={entry!.id} date={date} />
+                      <DiaryFoodEntry key={fe.id} entry={fe} diaryEntryId={(fe as FoodEntryData & { _diaryEntryId?: string })._diaryEntryId || entry!.id} date={date} />
                     ))}
                   </div>
                 )}
