@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { ArrowLeft, Save } from 'lucide-react';
+import TagPicker from '@/components/food/TagPicker';
 
 export default function EditFoodPage() {
   const router = useRouter();
@@ -29,8 +30,8 @@ export default function EditFoodPage() {
     sugar_g: '',
     sodium_mg: '',
     cholesterol_mg: '',
-    tags: '',
   });
+  const [editTags, setEditTags] = useState<string[]>([]);
 
   useEffect(() => {
     async function loadFood() {
@@ -54,8 +55,8 @@ export default function EditFoodPage() {
           sugar_g: f.sugar_g?.toString() || '',
           sodium_mg: f.sodium_mg?.toString() || '',
           cholesterol_mg: f.cholesterol_mg?.toString() || '',
-          tags: Array.isArray(f.tags) ? f.tags.join(', ') : '',
         });
+        setEditTags(Array.isArray(f.tags) ? f.tags : []);
       } catch {
         router.push('/my-foods');
       } finally {
@@ -96,7 +97,7 @@ export default function EditFoodPage() {
           sugar_g: form.sugar_g ? parseFloat(form.sugar_g) : null,
           sodium_mg: form.sodium_mg ? parseFloat(form.sodium_mg) : null,
           cholesterol_mg: form.cholesterol_mg ? parseFloat(form.cholesterol_mg) : null,
-          tags: form.tags ? form.tags.split(',').map((t) => t.trim()).filter(Boolean) : null,
+          tags: editTags.length > 0 ? editTags : null,
         }),
       });
 
@@ -196,12 +197,7 @@ export default function EditFoodPage() {
           </div>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Tags (comma-separated)</label>
-          <input type="text" value={form.tags} onChange={(e) => update('tags', e.target.value)}
-            placeholder="e.g. dinner, protein, homemade"
-            className="w-full rounded-lg border-2 border-gray-300 px-4 py-3 text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-        </div>
+        <TagPicker selected={editTags} onChange={setEditTags} />
 
         {form.barcode && (
           <div>

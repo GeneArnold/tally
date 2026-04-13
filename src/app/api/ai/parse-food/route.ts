@@ -18,15 +18,14 @@ Return ONLY valid JSON with these fields:
   "fiber_g": number or null,
   "sugar_g": number or null,
   "sodium_mg": number or null,
-  "cholesterol_mg": number or null,
-  "tags": ["suggested", "tags"]
+  "cholesterol_mg": number or null
 }
 
 Rules:
 - Use the most common/standard values when ranges are given (e.g. 72-78 kcal → use 78)
 - For photos of food, estimate reasonable portions and nutrition
 - For nutrition labels, read exact values
-- Tags: use practical categories like "protein", "breakfast", "snack", "restaurant", "homemade", "vegetable", "fruit", "grain", "dairy", "beverage", "fast-food"
+- Do NOT include tags — the user manages tags manually
 - If a value cannot be determined, use null
 - Return ONLY the JSON object, no markdown fences, no explanation`;
 

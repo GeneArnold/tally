@@ -2,12 +2,13 @@
 
 import { useState, useRef, lazy, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Search, Keyboard, ScanBarcode, Sparkles, Camera, ClipboardPaste } from 'lucide-react';
+import { ArrowLeft, Search, Keyboard, ScanBarcode, Sparkles, Camera, Image, ClipboardPaste, MessageSquare } from 'lucide-react';
+import TagPicker from '@/components/food/TagPicker';
 import type { StrippedFood } from '@/lib/usda';
 
 const BarcodeScanner = lazy(() => import('@/components/food/BarcodeScanner'));
 
-type AddMode = 'choose' | 'manual' | 'usda' | 'barcode' | 'barcode-scan' | 'ai-choose' | 'ai-text' | 'ai-photo';
+type AddMode = 'choose' | 'manual' | 'usda' | 'barcode' | 'barcode-scan' | 'ai-choose' | 'ai-text' | 'ai-describe' | 'ai-photo';
 
 interface ParsedFood {
   description: string;
@@ -28,7 +29,8 @@ interface ParsedFood {
 
 export default function AddFoodPage() {
   const router = useRouter();
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
   const [mode, setMode] = useState<AddMode>('choose');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -48,6 +50,7 @@ export default function AddFoodPage() {
 
   // AI state
   const [aiText, setAiText] = useState('');
+  const [aiDescribe, setAiDescribe] = useState('');
   const [aiParsing, setAiParsing] = useState(false);
 
   // Form state (shared by all modes)
@@ -66,14 +69,15 @@ export default function AddFoodPage() {
     sugar_g: '',
     sodium_mg: '',
     cholesterol_mg: '',
-    tags: '',
   });
+  const [formTags, setFormTags] = useState<string[]>([]);
 
   function updateForm(field: string, value: string) {
     setForm((prev) => ({ ...prev, [field]: value }));
   }
 
   function populateFromParsed(food: ParsedFood) {
+    setFormTags([]); // AI no longer suggests tags — user picks their own
     setForm({
       description: food.description || '',
       brand_name: food.brand_name || '',
@@ -89,7 +93,6 @@ export default function AddFoodPage() {
       sugar_g: food.sugar_g?.toString() || '',
       sodium_mg: food.sodium_mg?.toString() || '',
       cholesterol_mg: food.cholesterol_mg?.toString() || '',
-      tags: food.tags?.join(', ') || '',
     });
     setMode('manual');
   }
@@ -110,8 +113,8 @@ export default function AddFoodPage() {
       sugar_g: food.sugar_g.toString(),
       sodium_mg: food.sodium_mg.toString(),
       cholesterol_mg: '',
-      tags: '',
     });
+    setFormTags([]);
     setMode('manual');
   }
 
@@ -192,6 +195,35 @@ export default function AddFoodPage() {
     }
   }
 
+  async function describeFood(e: React.FormEvent) {
+    e.preventDefault();
+    if (!aiDescribe.trim()) return;
+    setAiParsing(true);
+    setError('');
+    try {
+      const res = await fetch('/api/ai/parse-food', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'text',
+          content: `I want to add this food to my nutrition tracker. Estimate the standard nutrition facts for: ${aiDescribe.trim()}. Use typical serving sizes and standard nutritional values. If a quantity is mentioned (e.g. "2 scrambled eggs"), calculate for that amount.`,
+        }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setError(data.error || 'AI lookup failed');
+        setAiParsing(false);
+        return;
+      }
+      const data = await res.json();
+      populateFromParsed(data.food);
+    } catch {
+      setError('Failed to look up food');
+    } finally {
+      setAiParsing(false);
+    }
+  }
+
   async function handlePhotoCapture(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -260,7 +292,7 @@ export default function AddFoodPage() {
           sugar_g: form.sugar_g ? parseFloat(form.sugar_g) : null,
           sodium_mg: form.sodium_mg ? parseFloat(form.sodium_mg) : null,
           cholesterol_mg: form.cholesterol_mg ? parseFloat(form.cholesterol_mg) : null,
-          tags: form.tags ? form.tags.split(',').map((t) => t.trim()).filter(Boolean) : null,
+          tags: formTags.length > 0 ? formTags : null,
           source: form.barcode ? 'usda' : 'manual',
         }),
       });
@@ -277,16 +309,25 @@ export default function AddFoodPage() {
     }
   }
 
-  // Hidden file input for camera
+  // Hidden file inputs — one for camera, one for gallery
   const cameraInput = (
+    <>
     <input
-      ref={fileInputRef}
+      ref={cameraInputRef}
       type="file"
       accept="image/*"
       capture="environment"
       onChange={handlePhotoCapture}
       className="hidden"
     />
+    <input
+      ref={galleryInputRef}
+      type="file"
+      accept="image/*"
+      onChange={handlePhotoCapture}
+      className="hidden"
+    />
+    </>
   );
 
   // === MODE CHOOSER ===
@@ -369,7 +410,20 @@ export default function AddFoodPage() {
 
         <div className="space-y-3">
           <button
-            onClick={() => setMode('ai-text')}
+            onClick={() => { setMode('ai-describe'); setAiDescribe(''); setError(''); }}
+            className="w-full bg-white rounded-xl p-5 shadow-sm active:bg-gray-50 text-left flex items-center gap-4 min-h-[72px]"
+          >
+            <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center shrink-0">
+              <MessageSquare size={24} className="text-blue-600" />
+            </div>
+            <div>
+              <p className="font-semibold text-gray-900 text-base">Describe a Food</p>
+              <p className="text-sm text-gray-500">Type &ldquo;scrambled eggs&rdquo; and AI estimates nutrition</p>
+            </div>
+          </button>
+
+          <button
+            onClick={() => { setMode('ai-text'); setAiText(''); setError(''); }}
             className="w-full bg-white rounded-xl p-5 shadow-sm active:bg-gray-50 text-left flex items-center gap-4 min-h-[72px]"
           >
             <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center shrink-0">
@@ -382,37 +436,72 @@ export default function AddFoodPage() {
           </button>
 
           <button
-            onClick={() => fileInputRef.current?.click()}
+            onClick={() => cameraInputRef.current?.click()}
             className="w-full bg-white rounded-xl p-5 shadow-sm active:bg-gray-50 text-left flex items-center gap-4 min-h-[72px]"
           >
             <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center shrink-0">
               <Camera size={24} className="text-orange-600" />
             </div>
             <div>
-              <p className="font-semibold text-gray-900 text-base">Photo of Nutrition Label</p>
-              <p className="text-sm text-gray-500">Snap the back of a package</p>
+              <p className="font-semibold text-gray-900 text-base">Take Photo</p>
+              <p className="text-sm text-gray-500">Snap a nutrition label or food with camera</p>
             </div>
           </button>
 
           <button
-            onClick={() => {
-              if (fileInputRef.current) {
-                fileInputRef.current.removeAttribute('capture');
-                fileInputRef.current.click();
-                fileInputRef.current.setAttribute('capture', 'environment');
-              }
-            }}
+            onClick={() => galleryInputRef.current?.click()}
             className="w-full bg-white rounded-xl p-5 shadow-sm active:bg-gray-50 text-left flex items-center gap-4 min-h-[72px]"
           >
             <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center shrink-0">
-              <Camera size={24} className="text-green-600" />
+              <Image size={24} className="text-green-600" />
             </div>
             <div>
-              <p className="font-semibold text-gray-900 text-base">Photo of Food</p>
-              <p className="text-sm text-gray-500">Photograph your meal for AI identification</p>
+              <p className="font-semibold text-gray-900 text-base">Choose from Gallery</p>
+              <p className="text-sm text-gray-500">Pick an existing photo of food or label</p>
             </div>
           </button>
         </div>
+      </div>
+    );
+  }
+
+  // === AI DESCRIBE FOOD ===
+  if (mode === 'ai-describe') {
+    return (
+      <div>
+        <button onClick={() => { setMode('ai-choose'); setAiDescribe(''); setError(''); }} className="flex items-center gap-1 text-blue-600 font-medium mb-4 min-h-[44px]">
+          <ArrowLeft size={20} /> Back
+        </button>
+        <h1 className="text-xl font-bold text-gray-900 mb-2">Describe a Food</h1>
+        <p className="text-gray-500 text-sm mb-4">
+          Type what you ate and AI will estimate the nutrition. Be specific for better results.
+        </p>
+
+        <form onSubmit={describeFood}>
+          <input
+            type="text"
+            value={aiDescribe}
+            onChange={(e) => setAiDescribe(e.target.value)}
+            placeholder="e.g. scrambled eggs, banana, slice of pizza..."
+            autoFocus
+            className="w-full rounded-lg border-2 border-gray-300 px-4 py-3.5 text-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+
+          <p className="text-xs text-gray-400 mt-2 mb-4">
+            Tip: include quantity for better accuracy — &ldquo;2 scrambled eggs with cheese&rdquo; instead of just &ldquo;scrambled eggs&rdquo;
+          </p>
+
+          {error && <div className="bg-red-50 text-red-700 text-base rounded-lg p-3 mb-3">{error}</div>}
+
+          <button
+            type="submit"
+            disabled={aiParsing || !aiDescribe.trim()}
+            className="w-full bg-blue-600 text-white rounded-lg px-4 py-4 text-lg font-semibold active:bg-blue-800 disabled:opacity-50 min-h-[52px] flex items-center justify-center gap-2"
+          >
+            <Sparkles size={20} />
+            {aiParsing ? 'Looking up nutrition...' : 'Look Up'}
+          </button>
+        </form>
       </div>
     );
   }
@@ -421,7 +510,7 @@ export default function AddFoodPage() {
   if (mode === 'ai-text') {
     return (
       <div>
-        <button onClick={() => setMode('ai-choose')} className="flex items-center gap-1 text-blue-600 font-medium mb-4 min-h-[44px]">
+        <button onClick={() => { setMode('ai-choose'); setAiText(''); setError(''); }} className="flex items-center gap-1 text-blue-600 font-medium mb-4 min-h-[44px]">
           <ArrowLeft size={20} /> Back
         </button>
         <h1 className="text-xl font-bold text-gray-900 mb-2">Paste Nutrition Info</h1>
@@ -623,9 +712,15 @@ export default function AddFoodPage() {
   }
 
   // === MANUAL ENTRY / REVIEW FORM ===
+  const resetForm = () => {
+    setForm({ description: '', brand_name: '', barcode: '', default_serving_size: '', default_serving_unit: 'g', energy_kcal: '', protein_g: '', fat_g: '', saturated_fat_g: '', carbs_g: '', fiber_g: '', sugar_g: '', sodium_mg: '', cholesterol_mg: '' });
+    setFormTags([]);
+    setError('');
+  };
+
   return (
     <div>
-      <button onClick={() => setMode('choose')} className="flex items-center gap-1 text-blue-600 font-medium mb-4 min-h-[44px]">
+      <button onClick={() => { resetForm(); setMode('choose'); }} className="flex items-center gap-1 text-blue-600 font-medium mb-4 min-h-[44px]">
         <ArrowLeft size={20} /> Back
       </button>
       <h1 className="text-xl font-bold text-gray-900 mb-4">
@@ -706,12 +801,7 @@ export default function AddFoodPage() {
           </div>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Tags (comma-separated)</label>
-          <input type="text" value={form.tags} onChange={(e) => updateForm('tags', e.target.value)}
-            placeholder="e.g. dinner, protein, homemade"
-            className="w-full rounded-lg border-2 border-gray-300 px-4 py-3 text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-        </div>
+        <TagPicker selected={formTags} onChange={setFormTags} />
 
         {form.barcode && (
           <p className="text-xs text-gray-400">Barcode: {form.barcode}</p>

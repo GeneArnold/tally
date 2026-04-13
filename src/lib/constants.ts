@@ -29,6 +29,15 @@ export const ACTIVITY_LEVELS = [
   { value: 'very_active', label: 'Very Active (6-7 days/week)' },
 ] as const;
 
+// Predefined tags — user picks from this list, no free-form entry
+export const FOOD_TAGS = [
+  'breakfast', 'lunch', 'dinner', 'snack',
+  'protein', 'low-cal',
+  'restaurant', 'quick', 'homemade',
+  'drink', 'condiment', 'treat',
+] as const;
+export type FoodTag = (typeof FOOD_TAGS)[number];
+
 // Default macro targets (can be overridden by health profile)
 export const DEFAULT_DAILY_GOALS = {
   calories: 2000,

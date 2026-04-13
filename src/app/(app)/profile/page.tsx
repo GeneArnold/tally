@@ -2,6 +2,7 @@ import { getSession } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import ProfileForm from '@/components/profile/ProfileForm';
 import WeightChart from '@/components/profile/WeightChart';
+import TagManager from '@/components/profile/TagManager';
 import LogoutButton from '@/components/profile/LogoutButton';
 
 export const dynamic = 'force-dynamic';
@@ -60,6 +61,9 @@ export default async function ProfilePage() {
         goalWeight={profile?.goal_weight_lbs}
         goalDate={profile?.goal_target_date}
       />
+
+      {/* Tag management */}
+      <TagManager />
 
       {/* Profile form */}
       <ProfileForm

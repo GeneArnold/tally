@@ -1,7 +1,21 @@
-import { redirect } from 'next/navigation';
+'use client';
 
-// Redirect /diary to today's date
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+
 export default function DiaryPage() {
-  const today = new Date().toISOString().split('T')[0];
-  redirect(`/diary/${today}`);
+  const router = useRouter();
+
+  useEffect(() => {
+    // Use local timezone, not UTC
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    router.replace(`/diary/${year}-${month}-${day}`);
+  }, [router]);
+
+  return (
+    <div className="text-center py-12 text-gray-500">Loading diary...</div>
+  );
 }

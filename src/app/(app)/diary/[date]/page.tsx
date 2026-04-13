@@ -100,13 +100,16 @@ export default async function DiaryDatePage({ params }: Props) {
     dayFat += e.total_fat_g || 0;
   }
 
-  const d = new Date(date + 'T12:00:00');
-  const prev = new Date(d); prev.setDate(prev.getDate() - 1);
-  const next = new Date(d); next.setDate(next.getDate() + 1);
-  const prevStr = prev.toISOString().split('T')[0];
-  const nextStr = next.toISOString().split('T')[0];
-  const today = new Date().toISOString().split('T')[0];
-  const isToday = date === today;
+  // Parse date parts directly to avoid timezone issues
+  const [year, month, day] = date.split('-').map(Number);
+  const d = new Date(year, month - 1, day);
+  const prev = new Date(year, month - 1, day - 1);
+  const next = new Date(year, month - 1, day + 1);
+  const prevStr = `${prev.getFullYear()}-${String(prev.getMonth() + 1).padStart(2, '0')}-${String(prev.getDate()).padStart(2, '0')}`;
+  const nextStr = `${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, '0')}-${String(next.getDate()).padStart(2, '0')}`;
+  const now = new Date();
+  const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  const isToday = date === todayStr;
 
   return (
     <div>
@@ -119,7 +122,7 @@ export default async function DiaryDatePage({ params }: Props) {
           <h1 className="text-lg font-bold text-gray-900">
             {isToday ? 'Today' : d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
           </h1>
-          {isToday && <p className="text-xs text-gray-500">{date}</p>}
+          <p className="text-xs text-gray-500">{`${String(month).padStart(2, '0')}/${String(day).padStart(2, '0')}/${year}`}</p>
         </div>
         <Link href={`/diary/${nextStr}`} className="text-blue-600 font-medium min-w-[44px] min-h-[44px] flex items-center">
           Next &rarr;
