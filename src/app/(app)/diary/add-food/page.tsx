@@ -12,6 +12,8 @@ interface Food {
   protein_g: number | null;
   carbs_g: number | null;
   fat_g: number | null;
+  default_serving_size: number | null;
+  default_serving_unit: string | null;
   tags: string[] | null;
 }
 
@@ -181,11 +183,13 @@ function AddFoodForm() {
                     </button>
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-gray-900 text-base">{food.description}</p>
-                      <div className="flex gap-3 mt-1 text-sm text-gray-600">
+                      <div className="flex items-center gap-2 mt-1 text-sm">
                         <span className="text-orange-600 font-medium">
                           {Math.round((food.energy_kcal || 0) * sel.quantity)} cal
                         </span>
-                        <span>P {Math.round((food.protein_g || 0) * sel.quantity)}g</span>
+                        {food.default_serving_size && (
+                          <span className="text-gray-400">&middot; {food.default_serving_size} {food.default_serving_unit || ''} per serving</span>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -236,14 +240,11 @@ function AddFoodForm() {
               <div className="w-7 h-7 rounded border-2 border-gray-300 shrink-0 mt-0.5" />
               <div className="flex-1 min-w-0">
                 <p className="font-medium text-gray-900 text-base">{food.description}</p>
-                {(food.brand_name) && (
-                  <p className="text-sm text-gray-500 mt-0.5">{food.brand_name}</p>
-                )}
-                <div className="flex gap-4 mt-1 text-sm text-gray-600">
+                <div className="flex items-center gap-2 mt-1 text-sm">
                   <span className="text-orange-600 font-medium">{food.energy_kcal || 0} cal</span>
-                  <span>P {food.protein_g || 0}g</span>
-                  <span>C {food.carbs_g || 0}g</span>
-                  <span>F {food.fat_g || 0}g</span>
+                  {food.default_serving_size && (
+                    <span className="text-gray-400">&middot; {food.default_serving_size} {food.default_serving_unit || ''} per serving</span>
+                  )}
                 </div>
               </div>
             </button>

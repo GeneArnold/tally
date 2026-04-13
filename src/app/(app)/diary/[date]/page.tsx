@@ -1,25 +1,13 @@
-import { getSession } from '@/lib/auth';
-import { redirect } from 'next/navigation';
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { MEAL_TYPES } from '@/lib/constants';
 import DiaryFoodEntry from '@/components/diary/DiaryFoodEntry';
 import DiaryDateNav from '@/components/diary/DiaryDateNav';
 
-export const dynamic = 'force-dynamic';
-
-const DIRECTUS_URL = process.env.DIRECTUS_URL || process.env.NEXT_PUBLIC_DIRECTUS_URL || 'http://localhost:8058';
-
-interface DiaryEntry {
-  id: string;
-  diary_meal: string;
-  total_calories: number | null;
-  total_protein_g: number | null;
-  total_carbs_g: number | null;
-  total_fat_g: number | null;
-  food_entries: FoodEntryData[];
-}
-
-export interface FoodEntryData {
+interface FoodEntryData {
   id: string;
   quantity: number;
   energy_kcal: number | null;
@@ -42,42 +30,44 @@ export interface FoodEntryData {
   } | null;
 }
 
-interface Props {
-  params: Promise<{ date: string }>;
+interface DiaryEntry {
+  id: string;
+  diary_meal: string;
+  total_calories: number | null;
+  total_protein_g: number | null;
+  total_carbs_g: number | null;
+  total_fat_g: number | null;
+  food_entries: FoodEntryData[];
 }
 
-async function getDiaryEntries(token: string, userId: string, date: string): Promise<DiaryEntry[]> {
-  const fields = [
-    'id', 'diary_meal', 'total_calories', 'total_protein_g', 'total_carbs_g', 'total_fat_g',
-    'food_entries.id', 'food_entries.quantity',
-    'food_entries.energy_kcal', 'food_entries.protein_g', 'food_entries.carbs_g', 'food_entries.fat_g',
-    'food_entries.fiber_g', 'food_entries.sodium_mg', 'food_entries.sugar_g',
-    'food_entries.food.id', 'food_entries.food.description', 'food_entries.food.brand_name',
-    'food_entries.food.energy_kcal', 'food_entries.food.protein_g', 'food_entries.food.carbs_g',
-    'food_entries.food.fat_g', 'food_entries.food.default_serving_size', 'food_entries.food.default_serving_unit',
-  ].join(',');
+export { type FoodEntryData };
 
-  const res = await fetch(
-    `${DIRECTUS_URL}/items/nx_diary_entries?filter[date][_eq]=${date}&filter[user][_eq]=${userId}&filter[type][_eq]=diary_meal&fields=${fields}&sort=diary_meal`,
-    {
-      headers: { Authorization: `Bearer ${token}` },
-      cache: 'no-store',
-    },
-  );
+export default function DiaryDatePage() {
+  const params = useParams();
+  const date = params.date as string;
 
-  if (!res.ok) return [];
-  const data = await res.json();
-  return data.data || [];
-}
+  const [entries, setEntries] = useState<DiaryEntry[]>([]);
+  const [loading, setLoading] = useState(true);
 
-export default async function DiaryDatePage({ params }: Props) {
-  const session = await getSession();
-  if (!session) redirect('/login');
+  useEffect(() => {
+    async function loadDiary() {
+      setLoading(true);
+      try {
+        const res = await fetch(`/api/diary/${date}`);
+        if (res.ok) {
+          const data = await res.json();
+          setEntries(data.entries || []);
+        }
+      } catch {
+        // Silent
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadDiary();
+  }, [date]);
 
-  const { date } = await params;
-  const entries = await getDiaryEntries(session.token, session.user.id, date);
-
-  // Merge entries for same meal (in case duplicates exist)
+  // Merge entries for same meal
   const entryMap = new Map<string, DiaryEntry>();
   for (const e of entries) {
     if (!e.diary_meal) continue;
@@ -101,20 +91,20 @@ export default async function DiaryDatePage({ params }: Props) {
     dayFat += e.total_fat_g || 0;
   }
 
-  // Parse date parts directly to avoid timezone issues
+  // Date navigation
   const [year, month, day] = date.split('-').map(Number);
   const d = new Date(year, month - 1, day);
   const prev = new Date(year, month - 1, day - 1);
   const next = new Date(year, month - 1, day + 1);
-  const prevStr = `${prev.getFullYear()}-${String(prev.getMonth() + 1).padStart(2, '0')}-${String(prev.getDate()).padStart(2, '0')}`;
-  const nextStr = `${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, '0')}-${String(next.getDate()).padStart(2, '0')}`;
+  const fmt = (dt: Date) => `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
+  const prevStr = fmt(prev);
+  const nextStr = fmt(next);
   const now = new Date();
-  const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  const todayStr = fmt(now);
   const isToday = date === todayStr;
 
   return (
     <div>
-      {/* Date nav */}
       <DiaryDateNav
         date={date}
         prevDate={prevStr}
@@ -146,40 +136,43 @@ export default async function DiaryDatePage({ params }: Props) {
         </div>
       )}
 
-      {/* Meal sections */}
-      <div className="space-y-3">
-        {MEAL_TYPES.map((meal) => {
-          const entry = entryMap.get(meal);
-          const foodEntries = entry?.food_entries || [];
-          const mealCal = entry?.total_calories || 0;
+      {loading ? (
+        <p className="text-center text-gray-500 py-8">Loading...</p>
+      ) : (
+        <div className="space-y-3">
+          {MEAL_TYPES.map((meal) => {
+            const entry = entryMap.get(meal);
+            const foodEntries = entry?.food_entries || [];
+            const mealCal = entry?.total_calories || 0;
 
-          return (
-            <div key={meal} className="bg-white rounded-xl shadow-sm overflow-hidden">
-              <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
-                <h2 className="font-semibold text-gray-800">{meal}</h2>
-                {mealCal > 0 && (
-                  <span className="text-sm text-orange-600 font-medium">{Math.round(mealCal)} cal</span>
-                )}
-              </div>
-
-              {foodEntries.length > 0 && (
-                <div className="divide-y divide-gray-50">
-                  {foodEntries.map((fe) => (
-                    <DiaryFoodEntry key={fe.id} entry={fe} diaryEntryId={entry!.id} date={date} />
-                  ))}
+            return (
+              <div key={meal} className="bg-white rounded-xl shadow-sm overflow-hidden">
+                <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+                  <h2 className="font-semibold text-gray-800">{meal}</h2>
+                  {mealCal > 0 && (
+                    <span className="text-sm text-orange-600 font-medium">{Math.round(mealCal)} cal</span>
+                  )}
                 </div>
-              )}
 
-              <Link
-                href={`/diary/add-food?meal=${encodeURIComponent(meal)}&date=${date}`}
-                className="block px-4 py-3 text-blue-600 text-sm font-medium active:bg-gray-50 min-h-[44px] flex items-center"
-              >
-                + Add Food
-              </Link>
-            </div>
-          );
-        })}
-      </div>
+                {foodEntries.length > 0 && (
+                  <div className="divide-y divide-gray-50">
+                    {foodEntries.map((fe) => (
+                      <DiaryFoodEntry key={fe.id} entry={fe} diaryEntryId={entry!.id} date={date} />
+                    ))}
+                  </div>
+                )}
+
+                <Link
+                  href={`/diary/add-food?meal=${encodeURIComponent(meal)}&date=${date}`}
+                  className="block px-4 py-3 text-blue-600 text-sm font-medium active:bg-gray-50 min-h-[44px] flex items-center"
+                >
+                  + Add Food
+                </Link>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
