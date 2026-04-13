@@ -18,6 +18,7 @@ interface Meal {
       energy_kcal: number | null;
     } | null;
   }[];
+  meal_tags?: { nx_food_tags_id: { id: string; name: string; color: string | null } }[];
 }
 
 export default function MealsPage() {
@@ -90,6 +91,13 @@ export default function MealsPage() {
                   <span className="text-orange-600 font-medium">{Math.round(totalCal)} cal</span>
                   <span>{foodCount} food{foodCount !== 1 ? 's' : ''}</span>
                 </div>
+                {meal.meal_tags && meal.meal_tags.length > 0 && (
+                  <div className="flex gap-1 mt-2 flex-wrap">
+                    {meal.meal_tags.map((t) => (
+                      <span key={t.nx_food_tags_id.id} className="text-xs rounded-full px-2 py-0.5 text-white" style={{ backgroundColor: t.nx_food_tags_id.color || '#3B82F6' }}>{t.nx_food_tags_id.name}</span>
+                    ))}
+                  </div>
+                )}
                 {meal.items.length > 0 && (
                   <div className="mt-2 flex flex-wrap gap-1">
                     {meal.items.slice(0, 4).map((item) => (

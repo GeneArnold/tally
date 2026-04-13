@@ -9,7 +9,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const { id } = await params;
-  const fields = 'id,name,description,default_meal_type,user,items.id,items.quantity,items.food.id,items.food.description,items.food.brand_name,items.food.energy_kcal,items.food.protein_g,items.food.carbs_g,items.food.fat_g';
+  const fields = 'id,name,description,default_meal_type,user,items.id,items.quantity,items.food.id,items.food.description,items.food.brand_name,items.food.energy_kcal,items.food.protein_g,items.food.carbs_g,items.food.fat_g,meal_tags.id,meal_tags.nx_food_tags_id.id,meal_tags.nx_food_tags_id.name,meal_tags.nx_food_tags_id.color';
 
   const res = await fetch(`${DIRECTUS_URL}/items/nx_meals/${id}?fields=${fields}`, {
     headers: { Authorization: `Bearer ${session.token}` },
@@ -17,6 +17,11 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
 
   if (!res.ok) return NextResponse.json({ error: 'Meal not found' }, { status: 404 });
   const data = await res.json();
+
+  // Flatten tags
+  const mealTags = (data.data.meal_tags || []).map((t: { nx_food_tags_id: { id: string; name: string; color: string } }) => t.nx_food_tags_id).filter(Boolean);
+  data.data.tag_ids = mealTags.map((t: { id: string }) => t.id);
+  data.data.tag_objects = mealTags;
   return NextResponse.json({ meal: data.data });
 }
 
@@ -26,20 +31,48 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const { id } = await params;
-  const body = await request.json();
+  const { tag_ids, ...mealFields } = await request.json();
 
-  const res = await fetch(`${DIRECTUS_URL}/items/nx_meals/${id}`, {
-    method: 'PATCH',
-    headers: {
-      Authorization: `Bearer ${session.token}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(body),
-  });
+  if (Object.keys(mealFields).length > 0) {
+    const res = await fetch(`${DIRECTUS_URL}/items/nx_meals/${id}`, {
+      method: 'PATCH',
+      headers: {
+        Authorization: `Bearer ${session.token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(mealFields),
+    });
 
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    return NextResponse.json({ error: err.errors?.[0]?.message || 'Failed to update' }, { status: 500 });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      return NextResponse.json({ error: err.errors?.[0]?.message || 'Failed to update' }, { status: 500 });
+    }
+  }
+
+  // Update tags via junction if provided
+  if (tag_ids !== undefined) {
+    const existingRes = await fetch(
+      `${DIRECTUS_URL}/items/nx_meals_nx_food_tags?filter[nx_meals_id][_eq]=${id}&fields=id`,
+      { headers: { Authorization: `Bearer ${session.token}` } },
+    );
+    if (existingRes.ok) {
+      const existingData = await existingRes.json();
+      const existingIds = (existingData.data || []).map((r: { id: number }) => r.id);
+      if (existingIds.length > 0) {
+        await fetch(`${DIRECTUS_URL}/items/nx_meals_nx_food_tags`, {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${session.token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify(existingIds),
+        });
+      }
+    }
+    if (tag_ids.length > 0) {
+      await fetch(`${DIRECTUS_URL}/items/nx_meals_nx_food_tags`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${session.token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(tag_ids.map((tagId: string) => ({ nx_meals_id: id, nx_food_tags_id: tagId }))),
+      });
+    }
   }
 
   return NextResponse.json({ success: true });

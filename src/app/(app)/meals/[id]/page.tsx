@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { ArrowLeft, Pencil, Trash2, Plus, UtensilsCrossed } from 'lucide-react';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
+import TagPicker from '@/components/food/TagPicker';
 import { MEAL_TYPES } from '@/lib/constants';
 
 interface MealItem {
@@ -35,6 +36,8 @@ export default function MealDetailPage() {
 
   const [meal, setMeal] = useState<Meal | null>(null);
   const [loading, setLoading] = useState(true);
+  const [mealTags, setMealTags] = useState<string[]>([]);
+  const [savingTags, setSavingTags] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [showDeleteItem, setShowDeleteItem] = useState<string | null>(null);
@@ -48,6 +51,7 @@ export default function MealDetailPage() {
       if (res.ok) {
         const data = await res.json();
         setMeal(data.meal);
+        setMealTags(data.meal?.tag_ids || []);
         if (data.meal?.default_meal_type) {
           setLogSlot(data.meal.default_meal_type);
         }
@@ -172,6 +176,29 @@ export default function MealDetailPage() {
           <p className="text-lg font-bold text-purple-600">{Math.round(totalFat)}g</p>
           <p className="text-[10px] text-gray-500">fat</p>
         </div>
+      </div>
+
+      {/* Tags */}
+      <div className="bg-white rounded-2xl p-4 shadow-sm mb-4">
+        <TagPicker
+          selectedIds={mealTags}
+          onChange={async (newTags) => {
+            setMealTags(newTags);
+            setSavingTags(true);
+            try {
+              await fetch(`/api/meals/${mealId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ tag_ids: newTags }),
+              });
+            } catch {
+              // Silent
+            } finally {
+              setSavingTags(false);
+            }
+          }}
+        />
+        {savingTags && <p className="text-xs text-gray-400 mt-1">Saving tags...</p>}
       </div>
 
       {/* Food list */}

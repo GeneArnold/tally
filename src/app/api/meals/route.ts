@@ -8,7 +8,7 @@ export async function GET() {
   const session = await getSession();
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const fields = 'id,name,description,default_meal_type,items.id,items.quantity,items.food.id,items.food.description,items.food.energy_kcal';
+  const fields = 'id,name,description,default_meal_type,items.id,items.quantity,items.food.id,items.food.description,items.food.energy_kcal,meal_tags.nx_food_tags_id.id,meal_tags.nx_food_tags_id.name,meal_tags.nx_food_tags_id.color';
   const params = new URLSearchParams({
     'fields': fields,
     'sort': 'name',
