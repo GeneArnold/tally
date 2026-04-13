@@ -20,7 +20,7 @@ interface Food {
 export default function MyFoodsPage() {
   const [foods, setFoods] = useState<Food[]>([]);
   const [search, setSearch] = useState('');
-  const [tagFilter, setTagFilter] = useState('');
+  const [tagFilters, setTagFilters] = useState<string[]>([]);
   const [allTags, setAllTags] = useState<{ name: string; color: string | null }[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -29,7 +29,7 @@ export default function MyFoodsPage() {
     try {
       const params = new URLSearchParams();
       if (search) params.set('q', search);
-      if (tagFilter) params.set('tag', tagFilter);
+      if (tagFilters.length > 0) params.set('tags', tagFilters.join(','));
 
       const res = await fetch(`/api/my-foods?${params}`);
       if (!res.ok) throw new Error('Failed to fetch');
@@ -41,7 +41,7 @@ export default function MyFoodsPage() {
     } finally {
       setLoading(false);
     }
-  }, [search, tagFilter]);
+  }, [search, tagFilters]);
 
   useEffect(() => {
     const timer = setTimeout(fetchFoods, 300);
@@ -73,30 +73,39 @@ export default function MyFoodsPage() {
         />
       </div>
 
-      {/* Tag filter pills */}
+      {/* Tag filter pills — cumulative, click to toggle each */}
       {allTags.length > 0 && (
         <div className="flex gap-2 overflow-x-auto pb-3 mb-3 -mx-4 px-4">
-          <button
-            onClick={() => setTagFilter('')}
-            className={`shrink-0 rounded-full px-3 py-1.5 text-sm font-medium min-h-[36px] ${
-              !tagFilter ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600'
-            }`}
-          >
-            All
-          </button>
-          {allTags.map((tag) => (
+          {tagFilters.length > 0 && (
             <button
-              key={tag.name}
-              onClick={() => setTagFilter(tagFilter === tag.name ? '' : tag.name)}
-              className={`shrink-0 rounded-full px-3 py-1.5 text-sm font-medium min-h-[36px] text-white`}
-              style={{
-                backgroundColor: tagFilter === tag.name ? (tag.color || '#3B82F6') : undefined,
-                ...(tagFilter !== tag.name ? { backgroundColor: '#f3f4f6', color: '#4b5563' } : {}),
-              }}
+              onClick={() => setTagFilters([])}
+              className="shrink-0 rounded-full px-3 py-1.5 text-sm font-medium min-h-[36px] bg-gray-200 text-gray-600 active:bg-gray-300"
             >
-              {tag.name}
+              Clear
             </button>
-          ))}
+          )}
+          {allTags.map((tag) => {
+            const active = tagFilters.includes(tag.name);
+            return (
+              <button
+                key={tag.name}
+                onClick={() => {
+                  if (active) {
+                    setTagFilters(tagFilters.filter((t) => t !== tag.name));
+                  } else {
+                    setTagFilters([...tagFilters, tag.name]);
+                  }
+                }}
+                className="shrink-0 rounded-full px-3 py-1.5 text-sm font-medium min-h-[36px]"
+                style={active
+                  ? { backgroundColor: tag.color || '#3B82F6', color: 'white' }
+                  : { backgroundColor: '#f3f4f6', color: '#4b5563' }
+                }
+              >
+                {tag.name}
+              </button>
+            );
+          })}
         </div>
       )}
 
@@ -106,9 +115,9 @@ export default function MyFoodsPage() {
       ) : foods.length === 0 ? (
         <div className="text-center py-12">
           <p className="text-gray-500 text-base mb-2">
-            {search || tagFilter ? 'No foods match your search' : 'No foods yet'}
+            {search || tagFilters.length > 0 ? 'No foods match your search' : 'No foods yet'}
           </p>
-          {!search && !tagFilter && (
+          {!search && tagFilters.length === 0 && (
             <p className="text-gray-400 text-sm">
               Tap &ldquo;Add Food&rdquo; to start building your catalog
             </p>

@@ -9,7 +9,8 @@ export async function GET(request: Request) {
 
   const { searchParams } = new URL(request.url);
   const query = searchParams.get('q')?.trim();
-  const tagFilter = searchParams.get('tag')?.trim();
+  const tagsParam = searchParams.get('tags')?.trim();
+  const tagNames = tagsParam ? tagsParam.split(',').filter(Boolean) : [];
 
   const filters: string[] = [
     'filter[deleted_at][_null]=true', // Exclude soft-deleted foods
@@ -17,9 +18,11 @@ export async function GET(request: Request) {
   if (query) {
     filters.push(`filter[description][_icontains]=${encodeURIComponent(query)}`);
   }
-  if (tagFilter) {
-    // Filter foods that have this tag via the M2M junction
-    filters.push(`filter[food_tags][nx_food_tags_id][name][_eq]=${encodeURIComponent(tagFilter)}`);
+  if (tagNames.length === 1) {
+    filters.push(`filter[food_tags][nx_food_tags_id][name][_eq]=${encodeURIComponent(tagNames[0])}`);
+  } else if (tagNames.length > 1) {
+    // Multiple tags — food must have ALL selected tags (AND logic)
+    // Directus doesn't support this in one filter, so we filter client-side
   }
 
   const fields = 'id,description,brand_name,energy_kcal,protein_g,carbs_g,fat_g,fiber_g,sugar_g,sodium_mg,default_serving_size,default_serving_unit,source,food_tags.nx_food_tags_id.id,food_tags.nx_food_tags_id.name,food_tags.nx_food_tags_id.color';
@@ -36,7 +39,7 @@ export async function GET(request: Request) {
     }
 
     const data = await res.json();
-    const foods = (data.data || []).map((f: Record<string, unknown>) => {
+    let foods = (data.data || []).map((f: Record<string, unknown>) => {
       // Flatten M2M tags into a simple array
       const foodTags = f.food_tags as { nx_food_tags_id: { id: string; name: string; color: string } }[] || [];
       return {
@@ -45,6 +48,14 @@ export async function GET(request: Request) {
         food_tags: undefined,
       };
     });
+
+    // Multi-tag filter (AND logic) — food must have ALL selected tags
+    if (tagNames.length > 1) {
+      foods = foods.filter((f: { tags: { name: string }[] }) => {
+        const foodTagNames = f.tags.map((t) => t.name);
+        return tagNames.every((tn) => foodTagNames.includes(tn));
+      });
+    }
 
     // Get user's tag list for filter pills
     const tagsRes = await fetch(
