@@ -14,8 +14,8 @@ export async function GET() {
     'sort': 'name',
     'limit': '100',
   });
-  // Show user's meals + shared meals (user=null)
-  const url = `${DIRECTUS_URL}/items/nx_meals?${params}&filter[_or][0][user][_eq]=${session.user.id}&filter[_or][1][user][_null]=true`;
+  // Show user's meals + shared meals (user=null), exclude soft-deleted
+  const url = `${DIRECTUS_URL}/items/nx_meals?${params}&filter[_and][0][_or][0][user][_eq]=${session.user.id}&filter[_and][0][_or][1][user][_null]=true&filter[_and][1][deleted_at][_null]=true`;
 
   const res = await fetch(url, {
     headers: { Authorization: `Bearer ${session.token}` },
