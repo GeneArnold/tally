@@ -1,47 +1,20 @@
-import { getSession } from '@/lib/auth';
-import { redirect } from 'next/navigation';
+'use client';
+
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Settings } from 'lucide-react';
 import LogWeightButton from '@/components/dashboard/LogWeightButton';
 
-export const dynamic = 'force-dynamic';
-
-const DIRECTUS_URL = process.env.DIRECTUS_URL || process.env.NEXT_PUBLIC_DIRECTUS_URL || 'http://localhost:8058';
-
-async function getProfile(token: string, userId: string) {
-  const params = new URLSearchParams({
-    'filter[user][_eq]': userId,
-    'fields': 'daily_calorie_goal,goal_protein_g,goal_carbs_g,goal_fat_g,current_weight_lbs,goal_weight_lbs',
-    'limit': '1',
-  });
-  const res = await fetch(`${DIRECTUS_URL}/items/nx_health_profile?${params}`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  if (!res.ok) return null;
-  const data = await res.json();
-  return data.data?.[0] || null;
-}
-
-async function getTodayTotals(token: string, userId: string) {
-  const today = new Date().toISOString().split('T')[0];
-  const params = new URLSearchParams({
-    'filter[date][_eq]': today,
-    'filter[user][_eq]': userId,
-    'filter[type][_eq]': 'diary_meal',
-    'aggregate[sum]': 'total_calories,total_protein_g,total_carbs_g,total_fat_g',
-  });
-  const res = await fetch(`${DIRECTUS_URL}/items/nx_diary_entries?${params}`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  if (!res.ok) return { calories: 0, protein: 0, carbs: 0, fat: 0 };
-  const data = await res.json();
-  const sums = data.data?.[0]?.sum || {};
-  return {
-    calories: parseFloat(sums.total_calories) || 0,
-    protein: parseFloat(sums.total_protein_g) || 0,
-    carbs: parseFloat(sums.total_carbs_g) || 0,
-    fat: parseFloat(sums.total_fat_g) || 0,
-  };
+interface DashboardData {
+  user: { first_name: string | null; last_name: string | null };
+  profile: {
+    daily_calorie_goal: number | null;
+    goal_protein_g: number | null;
+    goal_carbs_g: number | null;
+    goal_fat_g: number | null;
+  } | null;
+  totals: { calories: number; protein: number; carbs: number; fat: number };
+  hasProfile: boolean;
 }
 
 function ProgressRing({ value, max, label, unit, color }: { value: number; max: number; label: string; unit: string; color: string }) {
@@ -64,22 +37,41 @@ function ProgressRing({ value, max, label, unit, color }: { value: number; max: 
   );
 }
 
-export default async function DashboardPage() {
-  const session = await getSession();
-  if (!session) redirect('/login');
+export default function DashboardPage() {
+  const [data, setData] = useState<DashboardData | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const [profile, totals] = await Promise.all([
-    getProfile(session.token, session.user.id),
-    getTodayTotals(session.token, session.user.id),
-  ]);
+  useEffect(() => {
+    async function load() {
+      try {
+        const res = await fetch('/api/dashboard');
+        if (res.ok) {
+          setData(await res.json());
+        }
+      } catch {
+        // Silent
+      } finally {
+        setLoading(false);
+      }
+    }
+    load();
+  }, []);
 
-  const calGoal = profile?.daily_calorie_goal || 2000;
-  const proGoal = profile?.goal_protein_g || 150;
-  const carbGoal = profile?.goal_carbs_g || 250;
-  const fatGoal = profile?.goal_fat_g || 65;
+  if (loading) {
+    return <div className="text-center py-12 text-gray-500">Loading...</div>;
+  }
 
-  const calPct = Math.min((totals.calories / calGoal) * 100, 100);
-  const calRemaining = Math.max(calGoal - totals.calories, 0);
+  if (!data) {
+    return <div className="text-center py-12 text-gray-500">Could not load dashboard</div>;
+  }
+
+  const calGoal = data.profile?.daily_calorie_goal || 2000;
+  const proGoal = data.profile?.goal_protein_g || 150;
+  const carbGoal = data.profile?.goal_carbs_g || 250;
+  const fatGoal = data.profile?.goal_fat_g || 65;
+
+  const calPct = Math.min((data.totals.calories / calGoal) * 100, 100);
+  const calRemaining = Math.max(calGoal - data.totals.calories, 0);
 
   return (
     <div>
@@ -89,7 +81,7 @@ export default async function DashboardPage() {
           <img src="/nexus-logo.png" alt="Nexus Health" className="w-10 h-10 rounded-lg" />
           <div>
             <h1 className="text-lg font-bold text-gray-900">
-              Hi, {session.user.first_name || 'there'}
+              Hi, {data.user.first_name || 'there'}
             </h1>
             <p className="text-xs text-gray-500">
               {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
@@ -105,7 +97,7 @@ export default async function DashboardPage() {
       <div className="bg-white rounded-2xl p-5 shadow-sm mb-4">
         <div className="flex items-center justify-between mb-3">
           <h2 className="font-semibold text-gray-800">Today&apos;s Calories</h2>
-          <span className="text-sm text-gray-500">{Math.round(totals.calories)} / {calGoal}</span>
+          <span className="text-sm text-gray-500">{Math.round(data.totals.calories)} / {calGoal}</span>
         </div>
         <div className="w-full h-4 bg-gray-100 rounded-full overflow-hidden">
           <div
@@ -126,9 +118,9 @@ export default async function DashboardPage() {
       <div className="bg-white rounded-2xl p-5 shadow-sm mb-4">
         <h2 className="font-semibold text-gray-800 mb-4">Macros</h2>
         <div className="flex justify-around">
-          <ProgressRing value={totals.protein} max={proGoal} label="Protein" unit="g" color="#3b82f6" />
-          <ProgressRing value={totals.carbs} max={carbGoal} label="Carbs" unit="g" color="#22c55e" />
-          <ProgressRing value={totals.fat} max={fatGoal} label="Fat" unit="g" color="#a855f7" />
+          <ProgressRing value={data.totals.protein} max={proGoal} label="Protein" unit="g" color="#3b82f6" />
+          <ProgressRing value={data.totals.carbs} max={carbGoal} label="Carbs" unit="g" color="#22c55e" />
+          <ProgressRing value={data.totals.fat} max={fatGoal} label="Fat" unit="g" color="#a855f7" />
         </div>
       </div>
 
@@ -146,7 +138,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Setup prompt if no profile */}
-      {!profile && (
+      {!data.hasProfile && (
         <div className="mt-4 bg-blue-50 border border-blue-200 rounded-xl p-4">
           <p className="text-sm font-medium text-blue-800">Set up your profile</p>
           <p className="text-xs text-blue-600 mt-1">Add your goals and targets to personalize your dashboard.</p>
