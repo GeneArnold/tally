@@ -21,9 +21,37 @@ export default function DiaryFoodEntry({ entry, diaryEntryId, date }: Props) {
   const [qty, setQty] = useState(entry.quantity);
   const [saving, setSaving] = useState(false);
 
-  const foodName = entry.food?.description || 'Unknown food';
+  const isDeleted = !entry.food;
+  const foodName = entry.food?.description || 'Deleted food';
   const brandName = entry.food?.brand_name;
   const basePerServing = entry.food;
+
+  // If the food has been deleted, show a simplified view with remove option
+  if (isDeleted) {
+    return (
+      <div className="px-4 py-3 flex items-center justify-between bg-red-50/50">
+        <div className="flex-1">
+          <p className="text-sm text-red-400 italic">Deleted food</p>
+          <p className="text-xs text-gray-400">{Math.round(entry.energy_kcal || 0)} cal &middot; {entry.quantity} serving{entry.quantity !== 1 ? 's' : ''}</p>
+        </div>
+        <button
+          onClick={() => setShowDelete(true)}
+          className="text-red-500 text-xs font-medium flex items-center gap-1 min-h-[44px] px-2"
+        >
+          <Trash2 size={14} />
+          Remove
+        </button>
+        <ConfirmDialog
+          open={showDelete}
+          title="Remove deleted food?"
+          message="This food no longer exists. Remove this entry from your diary?"
+          confirmLabel={deleting ? 'Removing...' : 'Remove'}
+          onConfirm={handleDelete}
+          onCancel={() => setShowDelete(false)}
+        />
+      </div>
+    );
+  }
 
   // When editing, show live-calculated values based on new qty
   // When not editing, show the stored values

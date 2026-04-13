@@ -11,7 +11,9 @@ export async function GET(request: Request) {
   const query = searchParams.get('q')?.trim();
   const tagFilter = searchParams.get('tag')?.trim();
 
-  const filters: string[] = [];
+  const filters: string[] = [
+    'filter[deleted_at][_null]=true', // Exclude soft-deleted foods
+  ];
   if (query) {
     filters.push(`filter[description][_icontains]=${encodeURIComponent(query)}`);
   }

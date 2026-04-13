@@ -38,6 +38,13 @@ export default async function FoodDetailPage({ params, searchParams }: Props) {
     <div>
       <BackLink href={backHref} label={backLabel} />
 
+      {food.deleted_at && (
+        <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-4">
+          <p className="text-sm font-medium text-red-800">This food has been deleted</p>
+          <p className="text-xs text-red-600 mt-1">It may still appear in past diary entries.</p>
+        </div>
+      )}
+
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-xl font-bold text-gray-900">{food.description}</h1>
