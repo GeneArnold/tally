@@ -302,7 +302,7 @@ export default function AddFoodPage() {
         setSaving(false);
         return;
       }
-      router.push('/my-foods');
+      window.location.href = '/my-foods';
     } catch {
       setError('Failed to save food');
       setSaving(false);

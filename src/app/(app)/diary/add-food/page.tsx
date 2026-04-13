@@ -113,7 +113,7 @@ function AddFoodForm() {
         }
       }
 
-      router.push(`/diary/${date}`);
+      window.location.href = `/diary/${date}`;
     } catch {
       setError('Failed to add foods');
       setAdding(false);

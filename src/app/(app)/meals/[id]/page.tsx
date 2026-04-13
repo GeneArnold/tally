@@ -139,7 +139,7 @@ export default function MealDetailPage() {
 
   return (
     <div className="pb-24">
-      <button onClick={() => router.push('/meals')} className="flex items-center gap-1 text-blue-600 font-medium mb-4 min-h-[44px]">
+      <button onClick={() => { window.location.href = '/meals'; }} className="flex items-center gap-1 text-blue-600 font-medium mb-4 min-h-[44px]">
         <ArrowLeft size={20} /> Meals
       </button>
 
