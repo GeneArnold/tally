@@ -14,7 +14,7 @@ interface Food {
   fat_g: number | null;
   default_serving_size: number | null;
   default_serving_unit: string | null;
-  tags: string[] | null;
+  tags: { id: string; name: string; color: string | null }[] | null;
 }
 
 interface SelectedFood extends Food {
@@ -285,6 +285,13 @@ function AddFoodForm() {
                     <span className="text-gray-400">&middot; {food.default_serving_size} {food.default_serving_unit || ''} per serving</span>
                   )}
                 </div>
+                {food.tags && food.tags.length > 0 && (
+                  <div className="flex gap-1 mt-1.5 flex-wrap">
+                    {food.tags.map((tag) => (
+                      <span key={tag.id} className="text-xs rounded-full px-2 py-0.5 text-white" style={{ backgroundColor: tag.color || '#3B82F6' }}>{tag.name}</span>
+                    ))}
+                  </div>
+                )}
               </div>
             </button>
           ))}
