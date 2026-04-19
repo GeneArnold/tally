@@ -25,7 +25,8 @@ function AddFoodForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const meal = searchParams.get('meal') || 'Breakfast';
-  const date = searchParams.get('date') || new Date().toISOString().split('T')[0];
+  const now = new Date();
+  const date = searchParams.get('date') || `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 
   const [query, setQuery] = useState('');
   const [foods, setFoods] = useState<Food[]>([]);
@@ -33,23 +34,27 @@ function AddFoodForm() {
   const [selected, setSelected] = useState<Map<string, SelectedFood>>(new Map());
   const [adding, setAdding] = useState(false);
   const [error, setError] = useState('');
+  const [tagFilters, setTagFilters] = useState<string[]>([]);
+  const [allTags, setAllTags] = useState<{ name: string; color: string | null }[]>([]);
 
   const fetchFoods = useCallback(async () => {
     setLoading(true);
     try {
       const params = new URLSearchParams();
       if (query) params.set('q', query);
+      if (tagFilters.length > 0) params.set('tags', tagFilters.join(','));
       params.set('_t', Date.now().toString());
       const res = await fetch(`/api/my-foods?${params}`);
       if (!res.ok) throw new Error('Failed to fetch');
       const data = await res.json();
       setFoods(data.foods || []);
+      if (data.tags && allTags.length === 0) setAllTags(data.tags);
     } catch {
       // Silent fail
     } finally {
       setLoading(false);
     }
-  }, [query]);
+  }, [query, tagFilters]);
 
   useEffect(() => {
     const timer = setTimeout(fetchFoods, 300);
@@ -159,6 +164,39 @@ function AddFoodForm() {
           className="w-full rounded-lg border-2 border-gray-300 pl-10 pr-4 py-3 text-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
         />
       </div>
+
+      {/* Tag filter pills */}
+      {allTags.length > 0 && (
+        <div className="flex gap-2 overflow-x-auto pb-3 mb-3 -mx-4 px-4">
+          {tagFilters.length > 0 && (
+            <button
+              onClick={() => setTagFilters([])}
+              className="shrink-0 rounded-full px-3 py-1.5 text-sm font-medium min-h-[36px] bg-gray-200 text-gray-600 active:bg-gray-300"
+            >
+              Clear
+            </button>
+          )}
+          {allTags.map((tag) => {
+            const active = tagFilters.includes(tag.name);
+            return (
+              <button
+                key={tag.name}
+                onClick={() => {
+                  if (active) setTagFilters(tagFilters.filter((t) => t !== tag.name));
+                  else setTagFilters([...tagFilters, tag.name]);
+                }}
+                className="shrink-0 rounded-full px-3 py-1.5 text-sm font-medium min-h-[36px]"
+                style={active
+                  ? { backgroundColor: tag.color || '#3B82F6', color: 'white' }
+                  : { backgroundColor: '#f3f4f6', color: '#4b5563' }
+                }
+              >
+                {tag.name}
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       {error && (
         <div className="bg-red-50 text-red-700 text-base rounded-lg p-3 mb-4">{error}</div>

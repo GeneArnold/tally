@@ -85,7 +85,17 @@ export default function ProfileForm({ profile, userId, userEmail, userName }: Pr
         starting_weight_lbs: form.starting_weight_lbs ? parseFloat(form.starting_weight_lbs) : null,
         current_weight_lbs: form.current_weight_lbs ? parseFloat(form.current_weight_lbs) : null,
         goal_weight_lbs: form.goal_weight_lbs ? parseFloat(form.goal_weight_lbs) : null,
-        goal_target_date: form.goal_target_date || null,
+        goal_target_date: (() => {
+          const c = parseFloat(form.current_weight_lbs) || 0;
+          const g = parseFloat(form.goal_weight_lbs) || 0;
+          const rMap: Record<string, number> = { 'Lose 2 lbs per week': 2, 'Lose 1.5 lbs per week': 1.5, 'Lose 1 lb per week': 1, 'Lose 0.5 lb per week': 0.5, 'Gain 0.5 lb per week': 0.5, 'Gain 1 lb per week': 1 };
+          const r = rMap[form.weekly_goal] || 0;
+          if (c > 0 && g > 0 && r > 0 && Math.abs(c - g) > 0) {
+            const t = new Date(); t.setDate(t.getDate() + Math.ceil(Math.abs(c - g) / r) * 7);
+            return `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, '0')}-${String(t.getDate()).padStart(2, '0')}`;
+          }
+          return null;
+        })(),
         activity_level: form.activity_level || null,
         weekly_goal: form.weekly_goal || null,
         daily_calorie_goal: form.daily_calorie_goal ? parseInt(form.daily_calorie_goal) : null,
@@ -195,26 +205,55 @@ export default function ProfileForm({ profile, userId, userEmail, userName }: Pr
                 placeholder="175" className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500" />
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">Target Date</label>
-              <input type="date" value={form.goal_target_date} onChange={(e) => update('goal_target_date', e.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">Weekly Goal</label>
-              <select value={form.weekly_goal} onChange={(e) => update('weekly_goal', e.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <option value="Lose 2 lbs per week">Lose 2 lbs/week</option>
-                <option value="Lose 1.5 lbs per week">Lose 1.5 lbs/week</option>
-                <option value="Lose 1 lb per week">Lose 1 lb/week</option>
-                <option value="Lose 0.5 lb per week">Lose 0.5 lb/week</option>
-                <option value="Maintain">Maintain</option>
-                <option value="Gain 0.5 lb per week">Gain 0.5 lb/week</option>
-                <option value="Gain 1 lb per week">Gain 1 lb/week</option>
-              </select>
-            </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-500 mb-1">Weekly Goal</label>
+            <select value={form.weekly_goal} onChange={(e) => update('weekly_goal', e.target.value)}
+              className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <option value="Lose 2 lbs per week">Lose 2 lbs/week</option>
+              <option value="Lose 1.5 lbs per week">Lose 1.5 lbs/week</option>
+              <option value="Lose 1 lb per week">Lose 1 lb/week</option>
+              <option value="Lose 0.5 lb per week">Lose 0.5 lb/week</option>
+              <option value="Maintain">Maintain</option>
+              <option value="Gain 0.5 lb per week">Gain 0.5 lb/week</option>
+              <option value="Gain 1 lb per week">Gain 1 lb/week</option>
+            </select>
           </div>
+          {(() => {
+            const current = parseFloat(form.current_weight_lbs) || 0;
+            const goal = parseFloat(form.goal_weight_lbs) || 0;
+            const rateMap: Record<string, number> = {
+              'Lose 2 lbs per week': 2, 'Lose 1.5 lbs per week': 1.5,
+              'Lose 1 lb per week': 1, 'Lose 0.5 lb per week': 0.5,
+              'Gain 0.5 lb per week': 0.5, 'Gain 1 lb per week': 1,
+            };
+            const rate = rateMap[form.weekly_goal] || 0;
+            const diff = Math.abs(current - goal);
+            if (current > 0 && goal > 0 && rate > 0 && diff > 0) {
+              const weeks = Math.ceil(diff / rate);
+              const target = new Date();
+              target.setDate(target.getDate() + weeks * 7);
+              const targetStr = `${String(target.getMonth() + 1).padStart(2, '0')}/${String(target.getDate()).padStart(2, '0')}/${target.getFullYear()}`;
+              return (
+                <div className="bg-blue-50 rounded-lg p-3 mt-2">
+                  <p className="text-sm text-blue-800">
+                    <span className="font-semibold">Target date: {targetStr}</span>
+                    <span className="text-blue-600 ml-1">({weeks} weeks / {Math.round(weeks / 4.3)} months)</span>
+                  </p>
+                  <p className="text-xs text-blue-500 mt-1">
+                    {current > goal ? `Lose ${diff.toFixed(1)} lbs` : `Gain ${diff.toFixed(1)} lbs`} at {rate} lb/week
+                  </p>
+                </div>
+              );
+            }
+            if (form.weekly_goal === 'Maintain') {
+              return (
+                <div className="bg-green-50 rounded-lg p-3 mt-2">
+                  <p className="text-sm text-green-700 font-medium">Maintaining current weight</p>
+                </div>
+              );
+            }
+            return null;
+          })()}
         </div>
       </div>
 
