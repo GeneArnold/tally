@@ -134,7 +134,8 @@ export default function MealDetailPage() {
         });
       }
 
-      window.location.href = `/diary/${new Date().toISOString().split('T')[0]}`;
+      const n = new Date();
+      window.location.href = `/diary/${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, '0')}-${String(n.getDate()).padStart(2, '0')}`;
     } catch {
       setLogging(false);
     }

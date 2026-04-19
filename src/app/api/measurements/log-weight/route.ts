@@ -7,13 +7,15 @@ export async function POST(request: Request) {
   const session = await getSession();
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const { weight } = await request.json();
+  const { weight, date: clientDate } = await request.json();
 
   if (!weight || weight <= 0) {
     return NextResponse.json({ error: 'Invalid weight' }, { status: 400 });
   }
 
-  const today = new Date().toISOString().split('T')[0];
+  const now = new Date();
+  const serverToday = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  const today = clientDate || serverToday;
 
   try {
     // Create measurement record

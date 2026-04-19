@@ -3,9 +3,13 @@ import { getSession } from '@/lib/auth';
 
 const DIRECTUS_URL = process.env.DIRECTUS_URL || process.env.NEXT_PUBLIC_DIRECTUS_URL || 'http://localhost:8058';
 
-export async function GET() {
+export async function GET(request: Request) {
   const session = await getSession();
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+  // Accept date from client (local timezone) — don't calculate server-side (UTC)
+  const { searchParams } = new URL(request.url);
+  const clientDate = searchParams.get('date');
 
   // Get profile
   const profileRes = await fetch(
@@ -18,9 +22,10 @@ export async function GET() {
     profile = pd.data?.[0] || null;
   }
 
-  // Get today's totals
+  // Use client-provided date (local timezone) or fall back to server date
   const now = new Date();
-  const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  const serverToday = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  const today = clientDate || serverToday;
 
   const totalsRes = await fetch(
     `${DIRECTUS_URL}/items/nx_diary_entries?filter[date][_eq]=${today}&filter[user][_eq]=${session.user.id}&filter[type][_eq]=diary_meal&aggregate[sum]=total_calories,total_protein_g,total_carbs_g,total_fat_g`,

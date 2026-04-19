@@ -19,7 +19,10 @@ export default function LogWeightButton() {
       const res = await fetch('/api/measurements/log-weight', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ weight: parseFloat(weight) }),
+        body: JSON.stringify({
+          weight: parseFloat(weight),
+          date: `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}-${String(new Date().getDate()).padStart(2, '0')}`,
+        }),
       });
 
       if (!res.ok) {
@@ -57,7 +60,7 @@ export default function LogWeightButton() {
   return (
     <>
       <div className="fixed inset-0 bg-black/50 z-50 flex items-end justify-center" onClick={() => { setOpen(false); setWeight(''); setError(''); }}>
-        <div className="bg-white rounded-t-2xl w-full max-w-lg p-6 pb-[env(safe-area-inset-bottom)] animate-slide-up" onClick={(e) => e.stopPropagation()}>
+        <div className="bg-white rounded-t-2xl w-full max-w-lg p-6 pb-24 animate-slide-up" onClick={(e) => e.stopPropagation()}>
           <h3 className="text-lg font-bold text-gray-900 mb-4">Log Weight</h3>
 
           <div className="flex items-end gap-3 mb-4">

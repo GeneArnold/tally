@@ -44,7 +44,9 @@ export default function DashboardPage() {
   useEffect(() => {
     async function load() {
       try {
-        const res = await fetch(`/api/dashboard?_t=${Date.now()}`);
+        const now = new Date();
+        const localDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+        const res = await fetch(`/api/dashboard?date=${localDate}&_t=${Date.now()}`);
         if (res.ok) {
           setData(await res.json());
         }
