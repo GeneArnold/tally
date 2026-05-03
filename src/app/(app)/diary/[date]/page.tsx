@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { MEAL_TYPES } from '@/lib/constants';
 import DiaryFoodEntry from '@/components/diary/DiaryFoodEntry';
 import DiaryDateNav from '@/components/diary/DiaryDateNav';
+import JournalSection from '@/components/diary/JournalSection';
 
 interface FoodEntryData {
   id: string;
@@ -173,6 +174,8 @@ export default function DiaryDatePage() {
               </div>
             );
           })}
+
+          <JournalSection date={date} />
         </div>
       )}
     </div>

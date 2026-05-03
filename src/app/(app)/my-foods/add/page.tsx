@@ -2,13 +2,13 @@
 
 import { useState, useRef, lazy, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Search, Keyboard, ScanBarcode, Sparkles, Camera, Image, ClipboardPaste, MessageSquare } from 'lucide-react';
+import { ArrowLeft, Search, Keyboard, ScanBarcode, Sparkles, Camera, Image, ClipboardPaste, MessageSquare, RotateCcw } from 'lucide-react';
 import TagPicker from '@/components/food/TagPicker';
 import type { StrippedFood } from '@/lib/usda';
 
 const BarcodeScanner = lazy(() => import('@/components/food/BarcodeScanner'));
 
-type AddMode = 'choose' | 'manual' | 'usda' | 'barcode' | 'barcode-scan' | 'ai-choose' | 'ai-text' | 'ai-describe' | 'ai-photo';
+type AddMode = 'choose' | 'manual' | 'usda' | 'barcode' | 'barcode-scan' | 'ai-choose' | 'ai-text' | 'ai-describe' | 'ai-photo-preview' | 'ai-photo';
 
 interface ParsedFood {
   description: string;
@@ -52,6 +52,9 @@ export default function AddFoodPage() {
   const [aiText, setAiText] = useState('');
   const [aiDescribe, setAiDescribe] = useState('');
   const [aiParsing, setAiParsing] = useState(false);
+  const [photoContext, setPhotoContext] = useState('');
+  const [photoBase64, setPhotoBase64] = useState('');
+  const [photoMediaType, setPhotoMediaType] = useState('');
 
   // Form state (shared by all modes)
   const [form, setForm] = useState({
@@ -227,26 +230,34 @@ export default function AddFoodPage() {
   async function handlePhotoCapture(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    const buffer = await file.arrayBuffer();
+    const base64 = btoa(
+      new Uint8Array(buffer).reduce((data, byte) => data + String.fromCharCode(byte), ''),
+    );
+
+    setPhotoBase64(base64);
+    setPhotoMediaType(file.type);
+    setMode('ai-photo-preview');
+    // Reset file input so re-selecting the same file triggers onChange
+    e.target.value = '';
+  }
+
+  async function analyzePhoto() {
+    if (!photoBase64) return;
     setAiParsing(true);
     setError('');
     setMode('ai-photo');
 
     try {
-      // Convert to base64
-      const buffer = await file.arrayBuffer();
-      const base64 = btoa(
-        new Uint8Array(buffer).reduce((data, byte) => data + String.fromCharCode(byte), ''),
-      );
-
-      const mediaType = file.type as 'image/jpeg' | 'image/png' | 'image/webp';
-
       const res = await fetch('/api/ai/parse-food', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           type: 'image',
-          content: base64,
-          mediaType,
+          content: photoBase64,
+          mediaType: photoMediaType,
+          context: photoContext.trim() || undefined,
         }),
       });
 
@@ -254,6 +265,7 @@ export default function AddFoodPage() {
         const data = await res.json().catch(() => ({}));
         setError(data.error || 'AI parsing failed');
         setAiParsing(false);
+        setMode('ai-photo-preview');
         return;
       }
 
@@ -262,6 +274,7 @@ export default function AddFoodPage() {
     } catch {
       setError('Failed to process image');
       setAiParsing(false);
+      setMode('ai-photo-preview');
     }
   }
 
@@ -436,7 +449,7 @@ export default function AddFoodPage() {
           </button>
 
           <button
-            onClick={() => cameraInputRef.current?.click()}
+            onClick={() => { setPhotoBase64(''); setPhotoContext(''); setError(''); setMode('ai-photo-preview'); }}
             className="w-full bg-white rounded-xl p-5 shadow-sm active:bg-gray-50 text-left flex items-center gap-4 min-h-[72px]"
           >
             <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center shrink-0">
@@ -449,7 +462,7 @@ export default function AddFoodPage() {
           </button>
 
           <button
-            onClick={() => galleryInputRef.current?.click()}
+            onClick={() => { setPhotoBase64(''); setPhotoContext(''); setError(''); setMode('ai-photo-preview'); setTimeout(() => galleryInputRef.current?.click(), 100); }}
             className="w-full bg-white rounded-xl p-5 shadow-sm active:bg-gray-50 text-left flex items-center gap-4 min-h-[72px]"
           >
             <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center shrink-0">
@@ -539,6 +552,76 @@ export default function AddFoodPage() {
             {aiParsing ? 'AI is reading...' : 'Extract Nutrition'}
           </button>
         </form>
+      </div>
+    );
+  }
+
+  // === AI PHOTO PREVIEW ===
+  if (mode === 'ai-photo-preview') {
+    return (
+      <div>
+        {cameraInput}
+        <button onClick={() => { setMode('ai-choose'); setPhotoBase64(''); setPhotoContext(''); setError(''); }} className="flex items-center gap-1 text-blue-600 font-medium mb-4 min-h-[44px]">
+          <ArrowLeft size={20} /> Back
+        </button>
+        <h1 className="text-xl font-bold text-gray-900 mb-4">Photo Analysis</h1>
+
+        {/* Image preview */}
+        <div className="bg-gray-100 rounded-xl overflow-hidden mb-4 relative" style={{ minHeight: '200px' }}>
+          {photoBase64 ? (
+            <img
+              src={`data:${photoMediaType};base64,${photoBase64}`}
+              alt="Food photo"
+              className="w-full max-h-72 object-contain"
+            />
+          ) : (
+            <div className="flex flex-col items-center justify-center py-16 text-gray-400">
+              <Camera size={48} className="mb-2" />
+              <p className="text-sm">No photo taken yet</p>
+            </div>
+          )}
+        </div>
+
+        {/* Take / Retake buttons */}
+        <div className="flex gap-3 mb-4">
+          <button
+            onClick={() => cameraInputRef.current?.click()}
+            className="flex-1 bg-orange-600 text-white rounded-lg px-4 py-3.5 text-base font-semibold active:bg-orange-800 min-h-[52px] flex items-center justify-center gap-2"
+          >
+            {photoBase64 ? <><RotateCcw size={18} /> Retake</> : <><Camera size={18} /> Take Photo</>}
+          </button>
+          <button
+            onClick={() => galleryInputRef.current?.click()}
+            className="flex-1 bg-white border-2 border-gray-300 rounded-lg px-4 py-3.5 text-base font-medium text-gray-700 active:bg-gray-100 min-h-[52px] flex items-center justify-center gap-2"
+          >
+            <Image size={18} /> Gallery
+          </button>
+        </div>
+
+        {/* Optional context */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-1">What is this? (optional)</label>
+          <input
+            type="text"
+            value={photoContext}
+            onChange={(e) => setPhotoContext(e.target.value)}
+            placeholder="e.g. Kirkland Protein Bar, Kind Bar..."
+            className="w-full rounded-lg border-2 border-gray-300 px-4 py-3 text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+          <p className="text-xs text-gray-400 mt-1">Helps the AI identify the product and fill in details</p>
+        </div>
+
+        {error && <div className="bg-red-50 text-red-700 text-base rounded-lg p-3 mb-4">{error}</div>}
+
+        {/* Analyze button */}
+        <button
+          onClick={analyzePhoto}
+          disabled={!photoBase64}
+          className="w-full bg-purple-600 text-white rounded-lg px-4 py-4 text-lg font-semibold active:bg-purple-800 disabled:opacity-50 min-h-[52px] flex items-center justify-center gap-2"
+        >
+          <Sparkles size={20} />
+          Analyze Photo
+        </button>
       </div>
     );
   }

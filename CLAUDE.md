@@ -50,6 +50,8 @@ Use `/backup-prod` skill before any production work.
 - Open Food Facts uses HTTP not HTTPS from Docker (Alpine SSL issue)
 - Directus admin "No Items" on archived collections — toggle archive filter in right sidebar
 - Always use `window.location.href` not `router.push` after mutations (production caching)
+- Docker healthcheck must use `127.0.0.1` not `localhost` — Alpine resolves localhost to IPv6 `[::1]` but Next.js listens on IPv4 only. Use `/api/health` endpoint (no auth).
+- Next.js 16 restricts `cookies().set()` to Server Actions and Route Handlers — `getSession()` token refresh fails in server component contexts
 - Logo PNG has excess transparent padding — needs cropping
 
 ## AI Providers
