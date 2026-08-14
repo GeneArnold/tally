@@ -1,7 +1,7 @@
 {
-  "name": "Nexus Health",
-  "short_name": "Nexus Health",
-  "description": "Health & fitness tracking for the whole family",
+  "name": "Tally",
+  "short_name": "Tally",
+  "description": "Your food, your goals, your data",
   "start_url": "/dashboard",
   "display": "standalone",
   "background_color": "#f9fafb",

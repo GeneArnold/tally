@@ -44,8 +44,9 @@ export default function SignupPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Nexus Health</h1>
-          <p className="text-gray-600 mt-2 text-base">Create your account</p>
+          <h1 className="text-3xl font-bold text-gray-900">Tally</h1>
+          <p className="text-gray-600 mt-1 text-sm italic">your food, your goals, your data</p>
+          <p className="text-gray-600 mt-3 text-base">Create your account</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">

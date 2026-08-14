@@ -46,9 +46,10 @@ function LoginForm() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <img src="/nexus-logo.png" alt="Nexus Health" className="w-64 h-64 mx-auto mb-4 rounded-3xl" />
-          <h1 className="text-3xl font-bold text-gray-900">Nexus Health</h1>
-          <p className="text-gray-600 mt-2 text-base">Sign in to your account</p>
+          <img src="/nexus-logo.png" alt="Tally" className="w-64 h-64 mx-auto mb-4 rounded-3xl" />
+          <h1 className="text-3xl font-bold text-gray-900">Tally</h1>
+          <p className="text-gray-600 mt-1 text-sm italic">your food, your goals, your data</p>
+          <p className="text-gray-600 mt-3 text-base">Sign in to your account</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
