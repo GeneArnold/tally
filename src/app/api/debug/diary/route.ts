@@ -1,38 +1,51 @@
 import { NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth';
-
-const DIRECTUS_URL = process.env.DIRECTUS_URL || process.env.NEXT_PUBLIC_DIRECTUS_URL || 'http://localhost:8058';
+import { db, schema } from '@/lib/db';
+import { eq, and } from 'drizzle-orm';
 
 export async function GET(request: Request) {
   const session = await getSession();
-  if (!session) return NextResponse.json({ error: 'No session', directusUrl: DIRECTUS_URL });
+  if (!session) return NextResponse.json({ error: 'No session' });
 
   const { searchParams } = new URL(request.url);
   const date = searchParams.get('date') || '2026-04-13';
 
-  const fields = [
-    'id', 'diary_meal', 'total_calories',
-    'food_entries.id', 'food_entries.quantity',
-    'food_entries.energy_kcal', 'food_entries.food.id', 'food_entries.food.description',
-  ].join(',');
+  const entries = db.select().from(schema.diaryEntries)
+    .where(and(
+      eq(schema.diaryEntries.date, date),
+      eq(schema.diaryEntries.userId, session.user.id),
+      eq(schema.diaryEntries.type, 'diary_meal'),
+    )).all();
 
-  const url = `${DIRECTUS_URL}/items/nx_diary_entries?filter[date][_eq]=${date}&filter[user][_eq]=${session.user.id}&filter[type][_eq]=diary_meal&fields=${fields}`;
+  const entriesWithFoods = entries.map((entry) => {
+    const foodEntriesData = db.select({
+      id: schema.foodEntries.id,
+      quantity: schema.foodEntries.quantity,
+      energy_kcal: schema.foodEntries.energyKcal,
+      food_id: schema.foods.id,
+      food_description: schema.foods.description,
+    })
+      .from(schema.foodEntries)
+      .leftJoin(schema.foods, eq(schema.foodEntries.foodId, schema.foods.id))
+      .where(eq(schema.foodEntries.diaryEntryId, entry.id))
+      .all();
 
-  const res = await fetch(url, {
-    headers: { Authorization: `Bearer ${session.token}` },
-    cache: 'no-store',
+    return {
+      id: entry.id,
+      diary_meal: entry.diaryMeal,
+      total_calories: entry.totalCalories,
+      food_entries: foodEntriesData.map((fe) => ({
+        id: fe.id,
+        quantity: fe.quantity,
+        energy_kcal: fe.energy_kcal,
+        food: fe.food_id ? { id: fe.food_id, description: fe.food_description } : null,
+      })),
+    };
   });
 
-  const status = res.status;
-  const body = await res.json();
-
   return NextResponse.json({
-    directusUrl: DIRECTUS_URL,
     userId: session.user.id,
-    tokenPrefix: session.token.substring(0, 20) + '...',
-    queryUrl: url,
-    status,
-    entryCount: body.data?.length || 0,
-    entries: body.data,
+    entryCount: entriesWithFoods.length,
+    entries: entriesWithFoods,
   });
 }

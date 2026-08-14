@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth';
-
-const DIRECTUS_URL = process.env.DIRECTUS_URL || process.env.NEXT_PUBLIC_DIRECTUS_URL || 'http://localhost:8058';
+import { db, schema } from '@/lib/db';
+import { recalcDiaryTotals } from '@/lib/db/helpers';
+import { eq, and } from 'drizzle-orm';
 
 export async function POST(request: Request) {
   const session = await getSession();
@@ -15,45 +16,44 @@ export async function POST(request: Request) {
 
   try {
     // Find existing diary entry for this date + meal + user
-    const params = new URLSearchParams({
-      'filter[date][_eq]': date,
-      'filter[diary_meal][_eq]': meal,
-      'filter[type][_eq]': 'diary_meal',
-      'filter[user][_eq]': session.user.id,
-      'fields': 'id',
-      'limit': '1',
-    });
+    let diaryEntry = db
+      .select()
+      .from(schema.diaryEntries)
+      .where(
+        and(
+          eq(schema.diaryEntries.date, date),
+          eq(schema.diaryEntries.diaryMeal, meal),
+          eq(schema.diaryEntries.type, 'diary_meal'),
+          eq(schema.diaryEntries.userId, session.user.id),
+        ),
+      )
+      .get();
 
-    const searchRes = await fetch(`${DIRECTUS_URL}/items/nx_diary_entries?${params}`, {
-      headers: { Authorization: `Bearer ${session.token}` },
-    });
-    const searchData = await searchRes.json();
     let diaryEntryId: string;
 
-    if (searchData.data && searchData.data.length > 0) {
-      diaryEntryId = searchData.data[0].id;
+    if (diaryEntry) {
+      diaryEntryId = diaryEntry.id;
     } else {
-      const createRes = await fetch(`${DIRECTUS_URL}/items/nx_diary_entries`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${session.token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      // Create new diary entry
+      const result = db
+        .insert(schema.diaryEntries)
+        .values({
           date,
           type: 'diary_meal',
-          diary_meal: meal,
-          user: session.user.id,
-        }),
-      });
+          diaryMeal: meal,
+          userId: session.user.id,
+          totalCalories: 0,
+          totalProteinG: 0,
+          totalCarbsG: 0,
+          totalFatG: 0,
+          totalFiberG: 0,
+          totalSodiumMg: 0,
+          totalSugarG: 0,
+        })
+        .returning()
+        .get();
 
-      if (!createRes.ok) {
-        const err = await createRes.json().catch(() => ({}));
-        return NextResponse.json({ error: err.errors?.[0]?.message || 'Failed to create diary entry' }, { status: 500 });
-      }
-
-      const createData = await createRes.json();
-      diaryEntryId = createData.data.id;
+      diaryEntryId = result.id;
     }
 
     // Calculate nutrition * quantity
@@ -65,59 +65,24 @@ export async function POST(request: Request) {
     const sodium = Math.round((food.sodium_mg || 0) * quantity * 10) / 10;
     const sugar = Math.round((food.sugar_g || 0) * quantity * 10) / 10;
 
-    // Create food entry linked to food record
-    const foodEntryRes = await fetch(`${DIRECTUS_URL}/items/nx_food_entries`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${session.token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        diary_entry: diaryEntryId,
-        food: food.food_id || null,
+    // Create food entry linked to diary entry (and food.food_id if provided)
+    db.insert(schema.foodEntries)
+      .values({
+        diaryEntryId,
+        foodId: food.food_id || null,
         quantity,
-        energy_kcal: calories,
-        protein_g: protein,
-        carbs_g: carbs,
-        fat_g: fat,
-        fiber_g: fiber,
-        sodium_mg: sodium,
-        sugar_g: sugar,
-      }),
-    });
-
-    if (!foodEntryRes.ok) {
-      const err = await foodEntryRes.json().catch(() => ({}));
-      return NextResponse.json({ error: err.errors?.[0]?.message || 'Failed to create food entry' }, { status: 500 });
-    }
+        energyKcal: calories,
+        proteinG: protein,
+        carbsG: carbs,
+        fatG: fat,
+        fiberG: fiber,
+        sodiumMg: sodium,
+        sugarG: sugar,
+      })
+      .run();
 
     // Recalculate diary entry totals
-    const totalsParams = new URLSearchParams({
-      'filter[diary_entry][_eq]': diaryEntryId,
-      'aggregate[sum]': 'energy_kcal,protein_g,carbs_g,fat_g,fiber_g,sodium_mg,sugar_g',
-    });
-    const totalsRes = await fetch(`${DIRECTUS_URL}/items/nx_food_entries?${totalsParams}`, {
-      headers: { Authorization: `Bearer ${session.token}` },
-    });
-    const totalsData = await totalsRes.json();
-    const sums = totalsData.data?.[0]?.sum || {};
-
-    await fetch(`${DIRECTUS_URL}/items/nx_diary_entries/${diaryEntryId}`, {
-      method: 'PATCH',
-      headers: {
-        Authorization: `Bearer ${session.token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        total_calories: parseFloat(sums.energy_kcal) || 0,
-        total_protein_g: parseFloat(sums.protein_g) || 0,
-        total_carbs_g: parseFloat(sums.carbs_g) || 0,
-        total_fat_g: parseFloat(sums.fat_g) || 0,
-        total_fiber_g: parseFloat(sums.fiber_g) || 0,
-        total_sodium_mg: parseFloat(sums.sodium_mg) || 0,
-        total_sugar_g: parseFloat(sums.sugar_g) || 0,
-      }),
-    });
+    recalcDiaryTotals(diaryEntryId);
 
     return NextResponse.json({ success: true, diary_entry: diaryEntryId });
   } catch (err) {

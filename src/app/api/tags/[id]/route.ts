@@ -1,29 +1,43 @@
 import { NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth';
-
-const DIRECTUS_URL = process.env.DIRECTUS_URL || process.env.NEXT_PUBLIC_DIRECTUS_URL || 'http://localhost:8058';
+import { db, schema } from '@/lib/db';
+import { eq } from 'drizzle-orm';
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await getSession();
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const { id } = await params;
-  const body = await request.json();
+  try {
+    const { id } = await params;
+    const body = await request.json();
 
-  const res = await fetch(`${DIRECTUS_URL}/items/nx_food_tags/${id}`, {
-    method: 'PATCH',
-    headers: {
-      Authorization: `Bearer ${session.token}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(body),
-  });
+    // Map incoming fields to schema fields
+    const updates: Record<string, unknown> = {};
+    if (body.name !== undefined) updates.name = body.name;
+    if (body.color !== undefined) updates.color = body.color;
+    if (body.sort !== undefined) updates.sort = body.sort;
 
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    return NextResponse.json({ error: err.errors?.[0]?.message || 'Failed to update tag' }, { status: 500 });
+    if (Object.keys(updates).length === 0) {
+      return NextResponse.json({ error: 'No fields to update' }, { status: 400 });
+    }
+
+    const tag = await db
+      .update(schema.foodTags)
+      .set(updates)
+      .where(eq(schema.foodTags.id, id))
+      .returning({
+        id: schema.foodTags.id,
+        name: schema.foodTags.name,
+        color: schema.foodTags.color,
+        sort: schema.foodTags.sort,
+      })
+      .get();
+
+    return NextResponse.json({ tag });
+  } catch (err) {
+    return NextResponse.json(
+      { error: `Server error: ${err instanceof Error ? err.message : 'Unknown'}` },
+      { status: 500 },
+    );
   }
-
-  const data = await res.json();
-  return NextResponse.json({ tag: data.data });
 }

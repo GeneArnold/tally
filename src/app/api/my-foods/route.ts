@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth';
-
-const DIRECTUS_URL = process.env.DIRECTUS_URL || process.env.NEXT_PUBLIC_DIRECTUS_URL || 'http://localhost:8058';
+import { db, schema } from '@/lib/db';
+import { eq, and, like, isNull } from 'drizzle-orm';
 
 export async function GET(request: Request) {
   const session = await getSession();
@@ -12,66 +12,144 @@ export async function GET(request: Request) {
   const tagsParam = searchParams.get('tags')?.trim();
   const tagNames = tagsParam ? tagsParam.split(',').filter(Boolean) : [];
 
-  const filters: string[] = [
-    'filter[deleted_at][_null]=true', // Exclude soft-deleted foods
-  ];
-  if (query) {
-    filters.push(`filter[description][_icontains]=${encodeURIComponent(query)}`);
-  }
-  if (tagNames.length === 1) {
-    filters.push(`filter[food_tags][nx_food_tags_id][name][_eq]=${encodeURIComponent(tagNames[0])}`);
-  } else if (tagNames.length > 1) {
-    // Multiple tags — food must have ALL selected tags (AND logic)
-    // Directus doesn't support this in one filter, so we filter client-side
-  }
-
-  const fields = 'id,description,brand_name,energy_kcal,protein_g,carbs_g,fat_g,fiber_g,sugar_g,sodium_mg,default_serving_size,default_serving_unit,source,food_tags.nx_food_tags_id.id,food_tags.nx_food_tags_id.name,food_tags.nx_food_tags_id.color';
-  const url = `${DIRECTUS_URL}/items/nx_foods?fields=${fields}&sort=description&limit=100${filters.length ? '&' + filters.join('&') : ''}`;
-
   try {
-    const res = await fetch(url, {
-      headers: { Authorization: `Bearer ${session.token}` },
-    });
-
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      return NextResponse.json({ error: err.errors?.[0]?.message || 'Failed to fetch foods' }, { status: 500 });
+    // Build conditions
+    const conditions = [
+      eq(schema.foods.userId, session.user.id),
+      isNull(schema.foods.deletedAt),
+    ];
+    if (query) {
+      conditions.push(like(schema.foods.description, `%${query}%`));
     }
 
-    const data = await res.json();
-    let foods = (data.data || []).map((f: Record<string, unknown>) => {
-      // Flatten M2M tags into a simple array
-      const foodTags = f.food_tags as { nx_food_tags_id: { id: string; name: string; color: string } }[] || [];
-      return {
-        ...f,
-        tags: foodTags.map((t) => t.nx_food_tags_id).filter(Boolean),
-        food_tags: undefined,
-      };
-    });
+    let foods = db
+      .select({
+        id: schema.foods.id,
+        description: schema.foods.description,
+        brandName: schema.foods.brandName,
+        brandOwner: schema.foods.brandOwner,
+        upcCode: schema.foods.upcCode,
+        fdcId: schema.foods.fdcId,
+        source: schema.foods.source,
+        defaultServingSize: schema.foods.defaultServingSize,
+        defaultServingUnit: schema.foods.defaultServingUnit,
+        energyKcal: schema.foods.energyKcal,
+        proteinG: schema.foods.proteinG,
+        totalFatG: schema.foods.totalFatG,
+        carbohydrateG: schema.foods.carbohydrateG,
+        dietaryFiberG: schema.foods.dietaryFiberG,
+        totalSugarsG: schema.foods.totalSugarsG,
+        sodiumMg: schema.foods.sodiumMg,
+        saturatedFatG: schema.foods.saturatedFatG,
+        cholesterolMg: schema.foods.cholesterolMg,
+      })
+      .from(schema.foods)
+      .where(and(...conditions))
+      .all();
+
+    // For single tag, use database join to filter efficiently
+    if (tagNames.length === 1) {
+      const targetTagName = tagNames[0];
+
+      // Get the tag ID for this name
+      const tag = await db
+        .select({ id: schema.foodTags.id })
+        .from(schema.foodTags)
+        .where(
+          and(
+            eq(schema.foodTags.userId, session.user.id),
+            eq(schema.foodTags.name, targetTagName),
+            isNull(schema.foodTags.deletedAt),
+          ),
+        )
+        .limit(1);
+
+      if (tag.length > 0) {
+        const tagId = tag[0].id;
+
+        // Get food IDs that have this tag
+        const foodsWithTag = await db
+          .select({ foodId: schema.foodsToFoodTags.foodId })
+          .from(schema.foodsToFoodTags)
+          .where(eq(schema.foodsToFoodTags.foodTagId, tagId));
+
+        const foodIds = foodsWithTag.map((f) => f.foodId);
+
+        // Filter the foods list to only those with the tag
+        foods = foods.filter((f) => foodIds.includes(f.id));
+      } else {
+        foods = [];
+      }
+    }
+
+    // Fetch tags for each food
+    const foodsWithTags = await Promise.all(
+      foods.map(async (food) => {
+        const tags = await db
+          .select({
+            id: schema.foodTags.id,
+            name: schema.foodTags.name,
+            color: schema.foodTags.color,
+          })
+          .from(schema.foodsToFoodTags)
+          .innerJoin(schema.foodTags, eq(schema.foodsToFoodTags.foodTagId, schema.foodTags.id))
+          .where(eq(schema.foodsToFoodTags.foodId, food.id));
+
+        return {
+          ...food,
+          tags,
+        };
+      }),
+    );
 
     // Multi-tag filter (AND logic) — food must have ALL selected tags
     if (tagNames.length > 1) {
-      foods = foods.filter((f: { tags: { name: string }[] }) => {
-        const foodTagNames = f.tags.map((t) => t.name);
+      const filteredFoods = foodsWithTags.filter((food) => {
+        const foodTagNames = food.tags.map((t) => t.name);
         return tagNames.every((tn) => foodTagNames.includes(tn));
       });
+      foodsWithTags.splice(0, foodsWithTags.length, ...filteredFoods);
     }
+
+    // Convert camelCase to snake_case for response
+    const foodsResponse = foodsWithTags.map((f) => ({
+      id: f.id,
+      description: f.description,
+      brand_name: f.brandName,
+      brand_owner: f.brandOwner,
+      upc_code: f.upcCode,
+      fdc_id: f.fdcId,
+      source: f.source,
+      default_serving_size: f.defaultServingSize,
+      default_serving_unit: f.defaultServingUnit,
+      energy_kcal: f.energyKcal,
+      protein_g: f.proteinG,
+      fat_g: f.totalFatG,
+      carbs_g: f.carbohydrateG,
+      fiber_g: f.dietaryFiberG,
+      sugar_g: f.totalSugarsG,
+      sodium_mg: f.sodiumMg,
+      saturated_fat_g: f.saturatedFatG,
+      cholesterol_mg: f.cholesterolMg,
+      tags: f.tags,
+    }));
 
     // Get user's tag list for filter pills
-    const tagsRes = await fetch(
-      `${DIRECTUS_URL}/items/nx_food_tags?filter[user][_eq]=${session.user.id}&fields=name,color&sort=sort,name&limit=100`,
-      { headers: { Authorization: `Bearer ${session.token}` } },
-    );
-    let userTags: { name: string; color: string | null }[] = [];
-    if (tagsRes.ok) {
-      const tagsData = await tagsRes.json();
-      userTags = tagsData.data || [];
-    }
+    const userTags = await db
+      .select({
+        name: schema.foodTags.name,
+        color: schema.foodTags.color,
+      })
+      .from(schema.foodTags)
+      .where(
+        and(eq(schema.foodTags.userId, session.user.id), isNull(schema.foodTags.deletedAt)),
+      )
+      .orderBy(schema.foodTags.sort, schema.foodTags.name);
 
     return NextResponse.json({
-      foods,
+      foods: foodsResponse,
       tags: userTags,
-      total: foods.length,
+      total: foodsResponse.length,
     });
   } catch (err) {
     return NextResponse.json(

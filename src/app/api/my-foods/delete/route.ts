@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth';
-
-const DIRECTUS_URL = process.env.DIRECTUS_URL || process.env.NEXT_PUBLIC_DIRECTUS_URL || 'http://localhost:8058';
+import { db, schema } from '@/lib/db';
+import { eq } from 'drizzle-orm';
 
 export async function POST(request: Request) {
   const session = await getSession();
@@ -14,15 +14,11 @@ export async function POST(request: Request) {
   }
 
   try {
-    const res = await fetch(`${DIRECTUS_URL}/items/nx_foods/${foodId}`, {
-      method: 'DELETE',
-      headers: { Authorization: `Bearer ${session.token}` },
-    });
-
-    if (!res.ok && res.status !== 204) {
-      const err = await res.json().catch(() => ({}));
-      return NextResponse.json({ error: err.errors?.[0]?.message || 'Failed to delete food' }, { status: 500 });
-    }
+    // Soft delete: set deletedAt to current ISO timestamp
+    await db
+      .update(schema.foods)
+      .set({ deletedAt: new Date().toISOString() })
+      .where(eq(schema.foods.id, foodId));
 
     return NextResponse.json({ success: true });
   } catch (err) {

@@ -5,6 +5,6 @@ export async function GET() {
   const session = await getSession();
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  // TODO: Fetch weight measurements trend from Directus
+  // TODO: Fetch weight measurements trend from database
   return NextResponse.json({ weights: [] });
 }

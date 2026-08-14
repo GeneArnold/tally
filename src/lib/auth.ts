@@ -1,16 +1,21 @@
 import { cookies } from 'next/headers';
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
+import { db, schema } from '@/lib/db';
+import { eq } from 'drizzle-orm';
 
-const DIRECTUS_URL = process.env.DIRECTUS_URL || process.env.NEXT_PUBLIC_DIRECTUS_URL || 'http://localhost:8058';
+const JWT_SECRET = process.env.JWT_SECRET || 'change-me-in-production';
+const ACCESS_TOKEN_EXPIRY = '15m';
+const REFRESH_TOKEN_EXPIRY = '7d';
 const ACCESS_TOKEN_COOKIE = 'health_access_token';
 const REFRESH_TOKEN_COOKIE = 'health_refresh_token';
 
-interface AuthTokens {
-  access_token: string;
-  refresh_token: string;
-  expires: number;
+interface TokenPayload {
+  userId: string;
+  type: 'access' | 'refresh';
 }
 
-interface DirectusUser {
+export interface AuthUser {
   id: string;
   email: string;
   first_name: string | null;
@@ -18,86 +23,91 @@ interface DirectusUser {
   role: string;
 }
 
-export async function login(email: string, password: string): Promise<{ user: DirectusUser; error?: never } | { user?: never; error: string }> {
-  const res = await fetch(`${DIRECTUS_URL}/auth/login`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password }),
-  });
+export async function login(
+  email: string,
+  password: string,
+): Promise<{ user: AuthUser; error?: never } | { user?: never; error: string }> {
+  const user = db.select().from(schema.users).where(eq(schema.users.email, email.toLowerCase())).get();
 
-  if (!res.ok) {
-    const body = await res.json().catch(() => null);
-    return { error: body?.errors?.[0]?.message || 'Invalid credentials' };
-  }
+  if (!user) return { error: 'Invalid credentials' };
 
-  const { data } = await res.json() as { data: AuthTokens };
-  await setTokenCookies(data);
+  const valid = await bcrypt.compare(password, user.passwordHash);
+  if (!valid) return { error: 'Invalid credentials' };
 
-  const user = await getUser(data.access_token);
-  if (!user) return { error: 'Failed to fetch user profile' };
+  const authUser: AuthUser = {
+    id: user.id,
+    email: user.email,
+    first_name: user.firstName,
+    last_name: user.lastName,
+    role: user.role,
+  };
 
-  return { user };
+  await setTokenCookies(user.id);
+  return { user: authUser };
 }
 
-export async function signup(email: string, password: string, firstName: string, lastName: string): Promise<{ user: DirectusUser; error?: never } | { user?: never; error: string }> {
-  // Create user in Directus
-  const res = await fetch(`${DIRECTUS_URL}/users`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      email,
-      password,
-      first_name: firstName,
-      last_name: lastName,
-      role: process.env.DIRECTUS_ATHLETE_ROLE_ID,
-    }),
-  });
+export async function signup(
+  email: string,
+  password: string,
+  firstName: string,
+  lastName: string,
+): Promise<{ user: AuthUser; error?: never } | { user?: never; error: string }> {
+  const existing = db.select().from(schema.users).where(eq(schema.users.email, email.toLowerCase())).get();
+  if (existing) return { error: 'Email already registered' };
 
-  if (!res.ok) {
-    const body = await res.json().catch(() => null);
-    return { error: body?.errors?.[0]?.message || 'Registration failed' };
-  }
+  const passwordHash = await bcrypt.hash(password, 12);
 
-  // Auto-login after signup
-  return login(email, password);
+  const user = db.insert(schema.users).values({
+    email: email.toLowerCase(),
+    passwordHash,
+    firstName,
+    lastName,
+    role: 'athlete',
+  }).returning().get();
+
+  const authUser: AuthUser = {
+    id: user.id,
+    email: user.email,
+    first_name: user.firstName,
+    last_name: user.lastName,
+    role: user.role,
+  };
+
+  await setTokenCookies(user.id);
+  return { user: authUser };
 }
 
 export async function logout(): Promise<void> {
   const cookieStore = await cookies();
-  const refreshToken = cookieStore.get(REFRESH_TOKEN_COOKIE)?.value;
-
-  if (refreshToken) {
-    await fetch(`${DIRECTUS_URL}/auth/logout`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ refresh_token: refreshToken }),
-    }).catch(() => {});
-  }
-
   cookieStore.delete(ACCESS_TOKEN_COOKIE);
   cookieStore.delete(REFRESH_TOKEN_COOKIE);
 }
 
-export async function getSession(): Promise<{ token: string; user: DirectusUser } | null> {
+export async function getSession(): Promise<{ token: string; user: AuthUser } | null> {
   const cookieStore = await cookies();
-  let token = cookieStore.get(ACCESS_TOKEN_COOKIE)?.value;
+  const accessToken = cookieStore.get(ACCESS_TOKEN_COOKIE)?.value;
 
-  if (!token) {
-    // Try refresh
-    const refreshToken = cookieStore.get(REFRESH_TOKEN_COOKIE)?.value;
-    if (!refreshToken) return null;
-
-    const refreshed = await refreshAccessToken(refreshToken);
-    if (!refreshed) return null;
-
-    await setTokenCookies(refreshed);
-    token = refreshed.access_token;
+  if (accessToken) {
+    const payload = verifyToken(accessToken, 'access');
+    if (payload) {
+      const user = getUserById(payload.userId);
+      if (user) return { token: accessToken, user };
+    }
   }
 
-  const user = await getUser(token);
+  const refreshToken = cookieStore.get(REFRESH_TOKEN_COOKIE)?.value;
+  if (!refreshToken) return null;
+
+  const payload = verifyToken(refreshToken, 'refresh');
+  if (!payload) return null;
+
+  const user = getUserById(payload.userId);
   if (!user) return null;
 
-  return { token, user };
+  await setTokenCookies(payload.userId);
+
+  const newAccessToken = signToken(payload.userId, 'access');
+  return { token: newAccessToken, user };
 }
 
 export async function getAccessToken(): Promise<string | null> {
@@ -105,46 +115,54 @@ export async function getAccessToken(): Promise<string | null> {
   return session?.token ?? null;
 }
 
-async function getUser(token: string): Promise<DirectusUser | null> {
-  const res = await fetch(`${DIRECTUS_URL}/users/me?fields=id,email,first_name,last_name,role`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+function getUserById(id: string): AuthUser | null {
+  const user = db.select().from(schema.users).where(eq(schema.users.id, id)).get();
+  if (!user) return null;
 
-  if (!res.ok) return null;
-  const { data } = await res.json();
-  return data;
+  return {
+    id: user.id,
+    email: user.email,
+    first_name: user.firstName,
+    last_name: user.lastName,
+    role: user.role,
+  };
 }
 
-async function refreshAccessToken(refreshToken: string): Promise<AuthTokens | null> {
-  const res = await fetch(`${DIRECTUS_URL}/auth/refresh`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ refresh_token: refreshToken, mode: 'json' }),
-  });
-
-  if (!res.ok) return null;
-  const { data } = await res.json();
-  return data;
+function signToken(userId: string, type: 'access' | 'refresh'): string {
+  const expiresIn = type === 'access' ? ACCESS_TOKEN_EXPIRY : REFRESH_TOKEN_EXPIRY;
+  return jwt.sign({ userId, type } satisfies TokenPayload, JWT_SECRET, { expiresIn });
 }
 
-async function setTokenCookies(tokens: AuthTokens): Promise<void> {
+function verifyToken(token: string, expectedType: 'access' | 'refresh'): TokenPayload | null {
+  try {
+    const payload = jwt.verify(token, JWT_SECRET) as TokenPayload;
+    if (payload.type !== expectedType) return null;
+    return payload;
+  } catch {
+    return null;
+  }
+}
+
+async function setTokenCookies(userId: string): Promise<void> {
   const cookieStore = await cookies();
-  // Only set Secure flag when served over HTTPS
   const secure = process.env.COOKIE_SECURE === 'true';
 
-  cookieStore.set(ACCESS_TOKEN_COOKIE, tokens.access_token, {
+  const accessToken = signToken(userId, 'access');
+  const refreshToken = signToken(userId, 'refresh');
+
+  cookieStore.set(ACCESS_TOKEN_COOKIE, accessToken, {
     httpOnly: true,
     secure,
     sameSite: 'lax',
     path: '/',
-    maxAge: Math.floor(tokens.expires / 1000),
+    maxAge: 15 * 60,
   });
 
-  cookieStore.set(REFRESH_TOKEN_COOKIE, tokens.refresh_token, {
+  cookieStore.set(REFRESH_TOKEN_COOKIE, refreshToken, {
     httpOnly: true,
     secure,
     sameSite: 'lax',
     path: '/',
-    maxAge: 60 * 60 * 24 * 7, // 7 days
+    maxAge: 60 * 60 * 24 * 7,
   });
 }

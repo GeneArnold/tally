@@ -1,13 +1,13 @@
 import { getSession } from '@/lib/auth';
 import { redirect } from 'next/navigation';
+import { db, schema } from '@/lib/db';
+import { eq } from 'drizzle-orm';
 import Link from 'next/link';
 import { Pencil } from 'lucide-react';
 import BackLink from '@/components/food/BackLink';
 import DeleteFoodButton from '@/components/food/DeleteFoodButton';
 
 export const dynamic = 'force-dynamic';
-
-const DIRECTUS_URL = process.env.DIRECTUS_URL || process.env.NEXT_PUBLIC_DIRECTUS_URL || 'http://localhost:8058';
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -23,16 +23,35 @@ export default async function FoodDetailPage({ params, searchParams }: Props) {
   const backHref = from || '/my-foods';
   const backLabel = from?.startsWith('/diary') ? 'Back to Diary' : 'My Foods';
 
-  const res = await fetch(
-    `${DIRECTUS_URL}/items/nx_foods/${id}?fields=*,food_tags.nx_food_tags_id.id,food_tags.nx_food_tags_id.name,food_tags.nx_food_tags_id.color`,
-    { headers: { Authorization: `Bearer ${session.token}` } },
-  );
+  const foodRow = db.select().from(schema.foods).where(eq(schema.foods.id, id)).get();
+  if (!foodRow) redirect('/my-foods');
 
-  if (!res.ok) redirect('/my-foods');
-  const { data: food } = await res.json();
+  const tagRows = db.select({
+    id: schema.foodTags.id,
+    name: schema.foodTags.name,
+    color: schema.foodTags.color,
+  })
+    .from(schema.foodsToFoodTags)
+    .innerJoin(schema.foodTags, eq(schema.foodsToFoodTags.foodTagId, schema.foodTags.id))
+    .where(eq(schema.foodsToFoodTags.foodId, id))
+    .all();
 
-  // Flatten M2M tags
-  const foodTags = (food.food_tags || []).map((t: { nx_food_tags_id: { id: string; name: string; color: string } }) => t.nx_food_tags_id).filter(Boolean);
+  const food = {
+    id: foodRow.id,
+    description: foodRow.description,
+    brand_name: foodRow.brandName,
+    energy_kcal: foodRow.energyKcal,
+    protein_g: foodRow.proteinG,
+    fat_g: foodRow.totalFatG,
+    carbs_g: foodRow.carbohydrateG,
+    fiber_g: foodRow.dietaryFiberG,
+    sugar_g: foodRow.totalSugarsG,
+    sodium_mg: foodRow.sodiumMg,
+    default_serving_size: foodRow.defaultServingSize,
+    default_serving_unit: foodRow.defaultServingUnit,
+    barcode: foodRow.upcCode,
+    deleted_at: foodRow.deletedAt,
+  };
 
   return (
     <div>
@@ -85,9 +104,9 @@ export default async function FoodDetailPage({ params, searchParams }: Props) {
         </div>
       </div>
 
-      {foodTags.length > 0 && (
+      {tagRows.length > 0 && (
         <div className="mt-4 flex gap-2 flex-wrap">
-          {foodTags.map((tag: { id: string; name: string; color: string }) => (
+          {tagRows.map((tag) => (
             <span key={tag.id} className="text-sm rounded-full px-3 py-1 text-white" style={{ backgroundColor: tag.color || '#3B82F6' }}>{tag.name}</span>
           ))}
         </div>

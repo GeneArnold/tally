@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth';
-
-const DIRECTUS_URL = process.env.DIRECTUS_URL || process.env.NEXT_PUBLIC_DIRECTUS_URL || 'http://localhost:8058';
+import { db, schema } from '@/lib/db';
+import { eq, isNull } from 'drizzle-orm';
 
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await getSession();
@@ -9,23 +9,85 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
 
   const { id } = await params;
 
-  const res = await fetch(
-    `${DIRECTUS_URL}/items/nx_foods/${id}?fields=*,food_tags.id,food_tags.nx_food_tags_id.id,food_tags.nx_food_tags_id.name,food_tags.nx_food_tags_id.color`,
-    { headers: { Authorization: `Bearer ${session.token}` } },
-  );
+  try {
+    // Fetch the food
+    const foods = await db
+      .select({
+        id: schema.foods.id,
+        description: schema.foods.description,
+        brandName: schema.foods.brandName,
+        brandOwner: schema.foods.brandOwner,
+        upcCode: schema.foods.upcCode,
+        fdcId: schema.foods.fdcId,
+        source: schema.foods.source,
+        defaultServingSize: schema.foods.defaultServingSize,
+        defaultServingUnit: schema.foods.defaultServingUnit,
+        energyKcal: schema.foods.energyKcal,
+        proteinG: schema.foods.proteinG,
+        totalFatG: schema.foods.totalFatG,
+        carbohydrateG: schema.foods.carbohydrateG,
+        dietaryFiberG: schema.foods.dietaryFiberG,
+        totalSugarsG: schema.foods.totalSugarsG,
+        sodiumMg: schema.foods.sodiumMg,
+        saturatedFatG: schema.foods.saturatedFatG,
+        cholesterolMg: schema.foods.cholesterolMg,
+        deletedAt: schema.foods.deletedAt,
+        createdAt: schema.foods.createdAt,
+      })
+      .from(schema.foods)
+      .where(eq(schema.foods.id, id));
 
-  if (!res.ok) return NextResponse.json({ error: 'Food not found' }, { status: 404 });
+    if (!foods || foods.length === 0) {
+      return NextResponse.json({ error: 'Food not found' }, { status: 404 });
+    }
 
-  const data = await res.json();
-  const food = data.data;
+    const food = foods[0];
 
-  // Flatten M2M tags
-  const foodTags = food.food_tags as { id: number; nx_food_tags_id: { id: string; name: string; color: string } }[] || [];
-  food.tag_ids = foodTags.map((t) => t.nx_food_tags_id?.id).filter(Boolean);
-  food.tag_names = foodTags.map((t) => t.nx_food_tags_id?.name).filter(Boolean);
-  food.tag_objects = foodTags.map((t) => t.nx_food_tags_id).filter(Boolean);
+    // Fetch tags for this food
+    const tags = await db
+      .select({
+        id: schema.foodTags.id,
+        name: schema.foodTags.name,
+        color: schema.foodTags.color,
+      })
+      .from(schema.foodsToFoodTags)
+      .innerJoin(schema.foodTags, eq(schema.foodsToFoodTags.foodTagId, schema.foodTags.id))
+      .where(eq(schema.foodsToFoodTags.foodId, id));
 
-  return NextResponse.json({ food });
+    // Build response with snake_case fields
+    const foodResponse = {
+      id: food.id,
+      description: food.description,
+      brand_name: food.brandName,
+      brand_owner: food.brandOwner,
+      upc_code: food.upcCode,
+      fdc_id: food.fdcId,
+      source: food.source,
+      default_serving_size: food.defaultServingSize,
+      default_serving_unit: food.defaultServingUnit,
+      energy_kcal: food.energyKcal,
+      protein_g: food.proteinG,
+      fat_g: food.totalFatG,
+      carbs_g: food.carbohydrateG,
+      fiber_g: food.dietaryFiberG,
+      sugar_g: food.totalSugarsG,
+      sodium_mg: food.sodiumMg,
+      saturated_fat_g: food.saturatedFatG,
+      cholesterol_mg: food.cholesterolMg,
+      deleted_at: food.deletedAt,
+      created_at: food.createdAt,
+      tag_ids: tags.map((t) => t.id),
+      tag_names: tags.map((t) => t.name),
+      tag_objects: tags,
+    };
+
+    return NextResponse.json({ food: foodResponse });
+  } catch (err) {
+    return NextResponse.json(
+      { error: `Server error: ${err instanceof Error ? err.message : 'Unknown'}` },
+      { status: 500 },
+    );
+  }
 }
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -38,57 +100,63 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   // Separate tag_ids from other fields
   const { tag_ids, ...foodFields } = body;
 
-  // Update food fields
-  if (Object.keys(foodFields).length > 0) {
-    const res = await fetch(`${DIRECTUS_URL}/items/nx_foods/${id}`, {
-      method: 'PATCH',
-      headers: {
-        Authorization: `Bearer ${session.token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(foodFields),
-    });
+  try {
+    // Update food fields if any provided
+    if (Object.keys(foodFields).length > 0) {
+      // Map snake_case to camelCase
+      const updateData: Record<string, unknown> = {};
+      const fieldMapping: Record<string, string> = {
+        description: 'description',
+        brand_name: 'brandName',
+        brand_owner: 'brandOwner',
+        upc_code: 'upcCode',
+        fdc_id: 'fdcId',
+        source: 'source',
+        default_serving_size: 'defaultServingSize',
+        default_serving_unit: 'defaultServingUnit',
+        energy_kcal: 'energyKcal',
+        protein_g: 'proteinG',
+        fat_g: 'totalFatG',
+        carbs_g: 'carbohydrateG',
+        fiber_g: 'dietaryFiberG',
+        sugar_g: 'totalSugarsG',
+        sodium_mg: 'sodiumMg',
+        saturated_fat_g: 'saturatedFatG',
+        cholesterol_mg: 'cholesterolMg',
+      };
 
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      return NextResponse.json({ error: err.errors?.[0]?.message || 'Failed to update' }, { status: 500 });
-    }
-  }
+      for (const [snakeKey, value] of Object.entries(foodFields)) {
+        const camelKey = fieldMapping[snakeKey];
+        if (camelKey) {
+          updateData[camelKey] = value;
+        }
+      }
 
-  // Update tags via junction if tag_ids provided
-  if (tag_ids !== undefined) {
-    // Delete existing junction records one by one
-    const existingRes = await fetch(
-      `${DIRECTUS_URL}/items/nx_foods_nx_food_tags?filter[nx_foods_id][_eq]=${id}&fields=id&limit=100`,
-      { headers: { Authorization: `Bearer ${session.token}` } },
-    );
-    if (existingRes.ok) {
-      const existingData = await existingRes.json();
-      const existingIds = (existingData.data || []).map((r: { id: number }) => r.id);
-      for (const eid of existingIds) {
-        await fetch(`${DIRECTUS_URL}/items/nx_foods_nx_food_tags/${eid}`, {
-          method: 'DELETE',
-          headers: { Authorization: `Bearer ${session.token}` },
-        });
+      if (Object.keys(updateData).length > 0) {
+        await db.update(schema.foods).set(updateData).where(eq(schema.foods.id, id));
       }
     }
 
-    // Create new junction records
-    if (tag_ids.length > 0) {
-      const junctionRecords = tag_ids.map((tagId: string) => ({
-        nx_foods_id: id,
-        nx_food_tags_id: tagId,
-      }));
-      await fetch(`${DIRECTUS_URL}/items/nx_foods_nx_food_tags`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${session.token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(junctionRecords),
-      });
-    }
-  }
+    // Update tags via junction if tag_ids provided
+    if (tag_ids !== undefined) {
+      // Delete existing junction records for this food
+      await db.delete(schema.foodsToFoodTags).where(eq(schema.foodsToFoodTags.foodId, id));
 
-  return NextResponse.json({ success: true });
+      // Create new junction records if tag_ids is not empty
+      if (Array.isArray(tag_ids) && tag_ids.length > 0) {
+        const junctionRecords = tag_ids.map((tagId: string) => ({
+          foodId: id,
+          foodTagId: tagId,
+        }));
+        await db.insert(schema.foodsToFoodTags).values(junctionRecords);
+      }
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    return NextResponse.json(
+      { error: `Server error: ${err instanceof Error ? err.message : 'Unknown'}` },
+      { status: 500 },
+    );
+  }
 }

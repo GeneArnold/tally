@@ -6,6 +6,6 @@ export async function GET(_request: Request, { params }: { params: Promise<{ dat
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const { date } = await params;
-  // TODO: Fetch diary entries for date from Directus
+  // TODO: Fetch diary entries for date from database
   return NextResponse.json({ date, meals: [], totals: {} });
 }

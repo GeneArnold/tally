@@ -1,64 +1,47 @@
 import { NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth';
-
-const DIRECTUS_URL = process.env.DIRECTUS_URL || process.env.NEXT_PUBLIC_DIRECTUS_URL || 'http://localhost:8058';
+import { db, schema } from '@/lib/db';
+import { eq } from 'drizzle-orm';
 
 export async function POST(request: Request) {
   const session = await getSession();
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const { weight, date: clientDate } = await request.json();
-
-  if (!weight || weight <= 0) {
-    return NextResponse.json({ error: 'Invalid weight' }, { status: 400 });
-  }
-
-  const now = new Date();
-  const serverToday = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-  const today = clientDate || serverToday;
-
   try {
-    // Create measurement record
-    const measRes = await fetch(`${DIRECTUS_URL}/items/nx_measurements`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${session.token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
+    const { weight, date: clientDate } = await request.json();
+
+    if (!weight || weight <= 0) {
+      return NextResponse.json({ error: 'Invalid weight' }, { status: 400 });
+    }
+
+    const now = new Date();
+    const serverToday = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    const today = clientDate || serverToday;
+
+    // 1. Insert measurement record
+    await db
+      .insert(schema.measurements)
+      .values({
+        userId: session.user.id,
         date: today,
         type: 'weight',
         value: weight,
         unit: 'lbs',
-        user: session.user.id,
-      }),
-    });
-
-    if (!measRes.ok) {
-      const err = await measRes.json().catch(() => ({}));
-      return NextResponse.json({ error: err.errors?.[0]?.message || 'Failed to log weight' }, { status: 500 });
-    }
-
-    // Update current_weight_lbs on health profile
-    const profileParams = new URLSearchParams({
-      'filter[user][_eq]': session.user.id,
-      'fields': 'id',
-      'limit': '1',
-    });
-    const profileRes = await fetch(`${DIRECTUS_URL}/items/nx_health_profile?${profileParams}`, {
-      headers: { Authorization: `Bearer ${session.token}` },
-    });
-    const profileData = await profileRes.json();
-
-    if (profileData.data?.[0]?.id) {
-      await fetch(`${DIRECTUS_URL}/items/nx_health_profile/${profileData.data[0].id}`, {
-        method: 'PATCH',
-        headers: {
-          Authorization: `Bearer ${session.token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ current_weight_lbs: weight }),
       });
+
+    // 2. Find user's health profile
+    const profile = await db
+      .select()
+      .from(schema.healthProfiles)
+      .where(eq(schema.healthProfiles.userId, session.user.id))
+      .get();
+
+    // 3. Update currentWeightLbs on health profile if it exists
+    if (profile?.id) {
+      await db
+        .update(schema.healthProfiles)
+        .set({ currentWeightLbs: weight })
+        .where(eq(schema.healthProfiles.id, profile.id));
     }
 
     return NextResponse.json({ success: true });
