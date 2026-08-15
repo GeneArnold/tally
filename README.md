@@ -12,6 +12,19 @@ A mobile-first Progressive Web App for food logging, nutrition tracking, and hea
 - **AI-powered** — snap a photo or type a description and AI extracts the nutrition data
 - **Self-hosted** — deploy with Docker in minutes
 
+## Screenshots
+
+<p align="center">
+  <img src="docs/screenshots/login.jpg" alt="Login" width="200" />
+  <img src="docs/screenshots/dashboard.jpg" alt="Dashboard" width="200" />
+  <img src="docs/screenshots/diary.jpg" alt="Food Diary" width="200" />
+  <img src="docs/screenshots/my-foods.jpg" alt="My Foods" width="200" />
+</p>
+<p align="center">
+  <img src="docs/screenshots/add-food.jpg" alt="Add Food" width="200" />
+  <img src="docs/screenshots/meals.jpg" alt="Meals" width="200" />
+</p>
+
 ## Features
 
 - **Dashboard** — daily calorie progress bar, macro rings (protein/carbs/fat), quick actions
