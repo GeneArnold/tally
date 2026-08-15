@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Settings } from 'lucide-react';
+import { Settings, BookOpen, Plus } from 'lucide-react';
 import LogWeightButton from '@/components/dashboard/LogWeightButton';
 
 interface DashboardData {
@@ -129,11 +129,11 @@ export default function DashboardPage() {
       {/* Quick actions */}
       <div className="grid grid-cols-3 gap-3">
         <Link href="/diary" className="bg-white rounded-xl p-4 shadow-sm text-center active:bg-gray-50 min-h-[72px] flex flex-col items-center justify-center">
-          <span className="text-2xl mb-1">📖</span>
+          <BookOpen size={24} className="text-brand-600 mb-1" />
           <span className="text-sm font-medium text-gray-700">Food Diary</span>
         </Link>
         <Link href="/my-foods/add" className="bg-white rounded-xl p-4 shadow-sm text-center active:bg-gray-50 min-h-[72px] flex flex-col items-center justify-center">
-          <span className="text-2xl mb-1">➕</span>
+          <Plus size={24} className="text-brand-600 mb-1" />
           <span className="text-sm font-medium text-gray-700">Add Food</span>
         </Link>
         <LogWeightButton />
