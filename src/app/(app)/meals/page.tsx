@@ -48,7 +48,7 @@ export default function MealsPage() {
         <h1 className="text-xl font-bold text-gray-900">Meals</h1>
         <Link
           href="/meals/new"
-          className="bg-blue-600 text-white rounded-lg px-4 py-2.5 text-sm font-semibold flex items-center gap-1.5 active:bg-blue-800 min-h-[44px]"
+          className="bg-brand-600 text-white rounded-lg px-4 py-2.5 text-sm font-semibold flex items-center gap-1.5 active:bg-brand-800 min-h-[44px]"
         >
           <Plus size={18} />
           New Meal
@@ -94,7 +94,7 @@ export default function MealsPage() {
                 {meal.meal_tags && meal.meal_tags.length > 0 && (
                   <div className="flex gap-1 mt-2 flex-wrap">
                     {meal.meal_tags.map((t) => (
-                      <span key={t.nx_food_tags_id.id} className="text-xs rounded-full px-2 py-0.5 text-white" style={{ backgroundColor: t.nx_food_tags_id.color || '#3B82F6' }}>{t.nx_food_tags_id.name}</span>
+                      <span key={t.nx_food_tags_id.id} className="text-xs rounded-full px-2 py-0.5 text-white" style={{ backgroundColor: t.nx_food_tags_id.color || '#2EA96B' }}>{t.nx_food_tags_id.name}</span>
                     ))}
                   </div>
                 )}

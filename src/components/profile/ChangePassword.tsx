@@ -106,7 +106,7 @@ export default function ChangePassword() {
               required
               value={currentPassword}
               onChange={e => setCurrentPassword(e.target.value)}
-              className="w-full rounded-lg border-2 border-gray-300 px-3 py-2.5 pr-11 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full rounded-lg border-2 border-gray-300 px-3 py-2.5 pr-11 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
             />
             <button
               type="button"
@@ -130,7 +130,7 @@ export default function ChangePassword() {
               minLength={8}
               value={newPassword}
               onChange={e => setNewPassword(e.target.value)}
-              className="w-full rounded-lg border-2 border-gray-300 px-3 py-2.5 pr-11 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full rounded-lg border-2 border-gray-300 px-3 py-2.5 pr-11 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
               placeholder="At least 8 characters"
             />
             <button
@@ -155,7 +155,7 @@ export default function ChangePassword() {
               minLength={8}
               value={confirmPassword}
               onChange={e => setConfirmPassword(e.target.value)}
-              className="w-full rounded-lg border-2 border-gray-300 px-3 py-2.5 pr-11 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full rounded-lg border-2 border-gray-300 px-3 py-2.5 pr-11 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
             />
             <button
               type="button"
@@ -178,7 +178,7 @@ export default function ChangePassword() {
           <button
             type="submit"
             disabled={loading}
-            className="flex-1 bg-blue-600 text-white rounded-lg px-4 py-2.5 text-base font-semibold hover:bg-blue-700 disabled:opacity-50"
+            className="flex-1 bg-brand-600 text-white rounded-lg px-4 py-2.5 text-base font-semibold hover:bg-brand-700 disabled:opacity-50"
           >
             {loading ? 'Saving...' : 'Update Password'}
           </button>

@@ -43,7 +43,7 @@ export async function POST(request: Request) {
       .values({
         userId: session.user.id,
         name: name.trim().toLowerCase(),
-        color: color || '#3B82F6',
+        color: color || '#2EA96B',
         sort: 0,
       })
       .returning({

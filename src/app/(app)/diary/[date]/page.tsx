@@ -167,7 +167,7 @@ export default function DiaryDatePage() {
 
                 <Link
                   href={`/diary/add-food?meal=${encodeURIComponent(meal)}&date=${date}`}
-                  className="block px-4 py-3 text-blue-600 text-sm font-medium active:bg-gray-50 min-h-[44px] flex items-center"
+                  className="block px-4 py-3 text-brand-600 text-sm font-medium active:bg-gray-50 min-h-[44px] flex items-center"
                 >
                   + Add Food
                 </Link>

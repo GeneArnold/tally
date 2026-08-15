@@ -55,7 +55,7 @@ export default function MyFoodsPage() {
         <h1 className="text-xl font-bold text-gray-900">My Foods</h1>
         <Link
           href="/my-foods/add"
-          className="bg-blue-600 text-white rounded-lg px-4 py-2.5 text-sm font-semibold flex items-center gap-1.5 active:bg-blue-800 min-h-[44px]"
+          className="bg-brand-600 text-white rounded-lg px-4 py-2.5 text-sm font-semibold flex items-center gap-1.5 active:bg-brand-800 min-h-[44px]"
         >
           <Plus size={18} />
           Add Food
@@ -70,7 +70,7 @@ export default function MyFoodsPage() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search my foods..."
-          className="w-full rounded-lg border-2 border-gray-300 pl-10 pr-4 py-3 text-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="w-full rounded-lg border-2 border-gray-300 pl-10 pr-4 py-3 text-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
         />
       </div>
 
@@ -99,7 +99,7 @@ export default function MyFoodsPage() {
                 }}
                 className="shrink-0 rounded-full px-3 py-1.5 text-sm font-medium min-h-[36px]"
                 style={active
-                  ? { backgroundColor: tag.color || '#3B82F6', color: 'white' }
+                  ? { backgroundColor: tag.color || '#2EA96B', color: 'white' }
                   : { backgroundColor: '#f3f4f6', color: '#4b5563' }
                 }
               >
@@ -145,7 +145,7 @@ export default function MyFoodsPage() {
               {food.tags && food.tags.length > 0 && (
                 <div className="flex gap-1 mt-2 flex-wrap">
                   {food.tags.map((tag) => (
-                    <span key={tag.id} className="text-xs rounded-full px-2 py-0.5 text-white" style={{ backgroundColor: tag.color || '#3B82F6' }}>{tag.name}</span>
+                    <span key={tag.id} className="text-xs rounded-full px-2 py-0.5 text-white" style={{ backgroundColor: tag.color || '#2EA96B' }}>{tag.name}</span>
                   ))}
                 </div>
               )}

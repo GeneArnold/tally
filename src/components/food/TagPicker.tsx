@@ -50,7 +50,7 @@ export default function TagPicker({ selectedIds, onChange }: Props) {
     return (
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">Tags</label>
-        <p className="text-sm text-gray-400">No tags yet. Add tags in your <a href="/profile" className="text-blue-600">Profile</a>.</p>
+        <p className="text-sm text-gray-400">No tags yet. Add tags in your <a href="/profile" className="text-brand-600">Profile</a>.</p>
       </div>
     );
   }
@@ -67,7 +67,7 @@ export default function TagPicker({ selectedIds, onChange }: Props) {
             <span
               key={tag.id}
               className="rounded-full px-3 py-1.5 text-sm font-medium text-white"
-              style={{ backgroundColor: tag.color || '#3B82F6' }}
+              style={{ backgroundColor: tag.color || '#2EA96B' }}
             >
               {tag.name}
             </span>
@@ -94,7 +94,7 @@ export default function TagPicker({ selectedIds, onChange }: Props) {
         <button
           type="button"
           onClick={() => setExpanded(false)}
-          className="flex items-center gap-1 text-sm text-blue-600 font-medium min-h-[32px]"
+          className="flex items-center gap-1 text-sm text-brand-600 font-medium min-h-[32px]"
         >
           Done
           <ChevronUp size={14} />
@@ -114,7 +114,7 @@ export default function TagPicker({ selectedIds, onChange }: Props) {
                     ? 'text-white shadow-sm'
                     : 'bg-white text-gray-500 border border-gray-200 active:bg-gray-100'
                 }`}
-                style={isSelected ? { backgroundColor: tag.color || '#3B82F6' } : undefined}
+                style={isSelected ? { backgroundColor: tag.color || '#2EA96B' } : undefined}
               >
                 {tag.name}
               </button>

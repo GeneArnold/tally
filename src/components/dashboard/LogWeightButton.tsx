@@ -51,7 +51,7 @@ export default function LogWeightButton() {
         onClick={() => setOpen(true)}
         className="bg-white rounded-xl p-4 shadow-sm text-center active:bg-gray-50 min-h-[72px] flex flex-col items-center justify-center"
       >
-        <Scale size={24} className="text-blue-600 mb-1" />
+        <Scale size={24} className="text-brand-600 mb-1" />
         <span className="text-sm font-medium text-gray-700">Log Weight</span>
       </button>
     );
@@ -73,7 +73,7 @@ export default function LogWeightButton() {
                 onChange={(e) => setWeight(e.target.value)}
                 placeholder="0.0"
                 autoFocus
-                className="w-full rounded-lg border-2 border-gray-300 px-4 py-4 text-3xl font-bold text-gray-900 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full rounded-lg border-2 border-gray-300 px-4 py-4 text-3xl font-bold text-gray-900 text-center focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
               />
             </div>
             <span className="text-lg text-gray-500 pb-5">lbs</span>
@@ -94,7 +94,7 @@ export default function LogWeightButton() {
               className={`flex-1 rounded-lg px-4 py-3.5 text-base font-semibold min-h-[52px] ${
                 saved
                   ? 'bg-green-600 text-white'
-                  : 'bg-blue-600 text-white active:bg-blue-800 disabled:opacity-50'
+                  : 'bg-brand-600 text-white active:bg-brand-800 disabled:opacity-50'
               }`}
             >
               {saving ? 'Saving...' : saved ? 'Saved!' : 'Save'}

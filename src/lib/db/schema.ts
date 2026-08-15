@@ -84,7 +84,7 @@ export const foodTags = sqliteTable('food_tags', {
   id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
   userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
   name: text('name').notNull(),
-  color: text('color').default('#3B82F6'),
+  color: text('color').default('#2EA96B'),
   sort: integer('sort').default(0),
   deletedAt: text('deleted_at'),
 });

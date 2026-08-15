@@ -12,7 +12,7 @@ interface Tag {
 }
 
 const COLOR_PRESETS = [
-  '#3B82F6', '#22C55E', '#F59E0B', '#EF4444', '#A855F7',
+  '#2EA96B', '#22C55E', '#F59E0B', '#EF4444', '#A855F7',
   '#EC4899', '#06B6D4', '#F97316', '#6366F1', '#84CC16',
 ];
 
@@ -136,7 +136,7 @@ export default function TagManager() {
         <h2 className="font-semibold text-gray-800">Food Tags</h2>
         <button
           onClick={openAdd}
-          className="text-blue-600 text-sm font-medium flex items-center gap-1 min-h-[44px]"
+          className="text-brand-600 text-sm font-medium flex items-center gap-1 min-h-[44px]"
         >
           <Plus size={16} />
           Add Tag
@@ -153,7 +153,7 @@ export default function TagManager() {
               key={tag.id}
               onClick={() => openEdit(tag)}
               className="rounded-full px-3.5 py-2 text-sm font-medium text-white min-h-[36px] active:opacity-80"
-              style={{ backgroundColor: tag.color || '#3B82F6' }}
+              style={{ backgroundColor: tag.color || '#2EA96B' }}
             >
               {tag.name}
             </button>
@@ -187,7 +187,7 @@ export default function TagManager() {
                 onChange={(e) => setSheetName(e.target.value)}
                 placeholder="e.g. breakfast, protein"
                 autoFocus
-                className="w-full rounded-lg border-2 border-gray-300 px-4 py-3 text-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full rounded-lg border-2 border-gray-300 px-4 py-3 text-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                 onKeyDown={(e) => e.key === 'Enter' && handleSave()}
               />
             </div>
@@ -227,7 +227,7 @@ export default function TagManager() {
             <button
               onClick={handleSave}
               disabled={saving || !sheetName.trim()}
-              className="w-full bg-blue-600 text-white rounded-lg px-4 py-3.5 text-base font-semibold active:bg-blue-800 disabled:opacity-50 min-h-[52px] mb-3"
+              className="w-full bg-brand-600 text-white rounded-lg px-4 py-3.5 text-base font-semibold active:bg-brand-800 disabled:opacity-50 min-h-[52px] mb-3"
             >
               {saving ? 'Saving...' : sheetMode === 'add' ? 'Add Tag' : 'Save Changes'}
             </button>

@@ -120,7 +120,7 @@ export default function NewMealPage() {
   if (step === 'info') {
     return (
       <div>
-        <button onClick={() => router.back()} className="flex items-center gap-1 text-blue-600 font-medium mb-4 min-h-[44px]">
+        <button onClick={() => router.back()} className="flex items-center gap-1 text-brand-600 font-medium mb-4 min-h-[44px]">
           <ArrowLeft size={20} /> Back
         </button>
         <h1 className="text-xl font-bold text-gray-900 mb-6">New Meal</h1>
@@ -134,7 +134,7 @@ export default function NewMealPage() {
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. My Chicken Dinner, Morning Oatmeal"
               autoFocus
-              className="w-full rounded-lg border-2 border-gray-300 px-4 py-3 text-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full rounded-lg border-2 border-gray-300 px-4 py-3 text-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
             />
           </div>
 
@@ -145,7 +145,7 @@ export default function NewMealPage() {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Quick note about this meal"
-              className="w-full rounded-lg border-2 border-gray-300 px-4 py-3 text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full rounded-lg border-2 border-gray-300 px-4 py-3 text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
             />
           </div>
 
@@ -154,7 +154,7 @@ export default function NewMealPage() {
             <select
               value={mealType}
               onChange={(e) => setMealType(e.target.value)}
-              className="w-full rounded-lg border-2 border-gray-300 px-4 py-3 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full rounded-lg border-2 border-gray-300 px-4 py-3 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
             >
               <option value="">No default</option>
               {MEAL_TYPES.map((t) => (
@@ -171,7 +171,7 @@ export default function NewMealPage() {
               setError('');
               setStep('foods');
             }}
-            className="w-full bg-blue-600 text-white rounded-lg px-4 py-4 text-lg font-semibold active:bg-blue-800 min-h-[52px]"
+            className="w-full bg-brand-600 text-white rounded-lg px-4 py-4 text-lg font-semibold active:bg-brand-800 min-h-[52px]"
           >
             Next — Add Foods
           </button>
@@ -193,7 +193,7 @@ export default function NewMealPage() {
 
   return (
     <div className="pb-24">
-      <button onClick={() => setStep('info')} className="flex items-center gap-1 text-blue-600 font-medium mb-4 min-h-[44px]">
+      <button onClick={() => setStep('info')} className="flex items-center gap-1 text-brand-600 font-medium mb-4 min-h-[44px]">
         <ArrowLeft size={20} /> Back
       </button>
       <h1 className="text-xl font-bold text-gray-900 mb-1">Add Foods to &ldquo;{name}&rdquo;</h1>
@@ -207,7 +207,7 @@ export default function NewMealPage() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search my foods..."
-          className="w-full rounded-lg border-2 border-gray-300 pl-10 pr-4 py-3 text-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="w-full rounded-lg border-2 border-gray-300 pl-10 pr-4 py-3 text-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
         />
       </div>
 
@@ -221,9 +221,9 @@ export default function NewMealPage() {
             {[...selectedFoods, ...selectedNotInResults].map((food) => {
               const sel = selected.get(food.id)!;
               return (
-                <div key={food.id} className="bg-blue-50 rounded-xl p-4 border-2 border-blue-200">
+                <div key={food.id} className="bg-brand-50 rounded-xl p-4 border-2 border-brand-200">
                   <div className="flex items-start gap-3">
-                    <button onClick={() => toggleFood(food)} className="w-7 h-7 rounded bg-blue-600 flex items-center justify-center shrink-0 mt-0.5">
+                    <button onClick={() => toggleFood(food)} className="w-7 h-7 rounded bg-brand-600 flex items-center justify-center shrink-0 mt-0.5">
                       <Check size={16} className="text-white" />
                     </button>
                     <div className="flex-1 min-w-0">
@@ -281,7 +281,7 @@ export default function NewMealPage() {
             <button
               onClick={handleSave}
               disabled={saving}
-              className="w-full bg-blue-600 text-white rounded-xl px-4 py-4 text-lg font-semibold shadow-lg active:bg-blue-800 disabled:opacity-50 min-h-[56px]"
+              className="w-full bg-brand-600 text-white rounded-xl px-4 py-4 text-lg font-semibold shadow-lg active:bg-brand-800 disabled:opacity-50 min-h-[56px]"
             >
               {saving ? 'Creating...' : `Create Meal (${selected.size} foods, ${Math.round(totalCal)} cal)`}
             </button>

@@ -46,10 +46,12 @@ function LoginForm() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <img src="/nexus-logo.png" alt="Tally" className="w-64 h-64 mx-auto mb-4 rounded-3xl" />
-          <h1 className="text-3xl font-bold text-gray-900">Tally</h1>
-          <p className="text-gray-600 mt-1 text-sm italic">your food, your goals, your data</p>
-          <p className="text-gray-600 mt-3 text-base">Sign in to your account</p>
+          <div className="flex items-center justify-center gap-3 mb-3">
+            <img src="/tally-mark.svg" alt="" className="w-14 h-14" />
+            <h1 className="text-4xl font-[var(--font-bricolage)] font-extrabold text-gray-900 tracking-tight lowercase">tally</h1>
+          </div>
+          <p className="text-gray-500 text-sm italic">your food, your goals, your data</p>
+          <p className="text-gray-600 mt-4 text-base">Sign in to your account</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
@@ -69,7 +71,7 @@ function LoginForm() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded-lg border-2 border-gray-300 px-4 py-3.5 text-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full rounded-lg border-2 border-gray-300 px-4 py-3.5 text-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
               placeholder="you@example.com"
             />
           </div>
@@ -86,7 +88,7 @@ function LoginForm() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded-lg border-2 border-gray-300 px-4 py-3.5 pr-12 text-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full rounded-lg border-2 border-gray-300 px-4 py-3.5 pr-12 text-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                 placeholder="Your password"
               />
               <button
@@ -103,7 +105,7 @@ function LoginForm() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full flex items-center justify-center gap-2 bg-blue-600 text-white rounded-lg px-4 py-4 text-lg font-semibold hover:bg-blue-700 active:bg-blue-800 disabled:opacity-50 disabled:cursor-not-allowed min-h-[52px]"
+            className="w-full flex items-center justify-center gap-2 bg-brand-600 text-white rounded-lg px-4 py-4 text-lg font-semibold hover:bg-brand-700 active:bg-brand-800 disabled:opacity-50 disabled:cursor-not-allowed min-h-[52px]"
           >
             <LogIn size={20} />
             {loading ? 'Signing in...' : 'Sign in'}
@@ -112,7 +114,7 @@ function LoginForm() {
 
         <p className="text-center text-base text-gray-600 mt-8">
           Don&apos;t have an account?{' '}
-          <Link href="/signup" className="text-blue-600 font-semibold hover:underline">
+          <Link href="/signup" className="text-brand-600 font-semibold hover:underline">
             Sign up
           </Link>
         </p>

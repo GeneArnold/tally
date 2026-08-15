@@ -148,12 +148,12 @@ export default function ProfileForm({ profile, userId, userEmail, userName }: Pr
           <div>
             <label className="block text-xs font-medium text-gray-500 mb-1">Date of Birth</label>
             <input type="date" value={form.date_of_birth} onChange={(e) => update('date_of_birth', e.target.value)}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500" />
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-500 mb-1">Sex</label>
             <select value={form.sex} onChange={(e) => update('sex', e.target.value)}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500">
+              className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500">
               <option value="">Select</option>
               <option value="M">Male</option>
               <option value="F">Female</option>
@@ -163,18 +163,18 @@ export default function ProfileForm({ profile, userId, userEmail, userName }: Pr
             <div>
               <label className="block text-xs font-medium text-gray-500 mb-1">Height (ft)</label>
               <input type="number" value={form.height_ft} onChange={(e) => update('height_ft', e.target.value)}
-                placeholder="5" className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                placeholder="5" className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500" />
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-500 mb-1">Height (in)</label>
               <input type="number" value={form.height_in} onChange={(e) => update('height_in', e.target.value)}
-                min="0" max="11" placeholder="10" className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                min="0" max="11" placeholder="10" className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500" />
             </div>
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-500 mb-1">Activity Level</label>
             <select value={form.activity_level} onChange={(e) => update('activity_level', e.target.value)}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500">
+              className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500">
               <option value="sedentary">Sedentary (little or no exercise)</option>
               <option value="lightly_active">Lightly Active (1-3 days/week)</option>
               <option value="active">Active (3-5 days/week)</option>
@@ -192,23 +192,23 @@ export default function ProfileForm({ profile, userId, userEmail, userName }: Pr
             <div>
               <label className="block text-xs font-medium text-gray-500 mb-1">Starting</label>
               <input type="number" step="0.1" value={form.starting_weight_lbs} onChange={(e) => update('starting_weight_lbs', e.target.value)}
-                placeholder="200" className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                placeholder="200" className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500" />
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-500 mb-1">Current</label>
               <input type="number" step="0.1" value={form.current_weight_lbs} onChange={(e) => update('current_weight_lbs', e.target.value)}
-                placeholder="195" className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                placeholder="195" className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500" />
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-500 mb-1">Goal</label>
               <input type="number" step="0.1" value={form.goal_weight_lbs} onChange={(e) => update('goal_weight_lbs', e.target.value)}
-                placeholder="175" className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                placeholder="175" className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500" />
             </div>
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-500 mb-1">Weekly Goal</label>
             <select value={form.weekly_goal} onChange={(e) => update('weekly_goal', e.target.value)}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500">
+              className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500">
               <option value="Lose 2 lbs per week">Lose 2 lbs/week</option>
               <option value="Lose 1.5 lbs per week">Lose 1.5 lbs/week</option>
               <option value="Lose 1 lb per week">Lose 1 lb/week</option>
@@ -234,12 +234,12 @@ export default function ProfileForm({ profile, userId, userEmail, userName }: Pr
               target.setDate(target.getDate() + weeks * 7);
               const targetStr = `${String(target.getMonth() + 1).padStart(2, '0')}/${String(target.getDate()).padStart(2, '0')}/${target.getFullYear()}`;
               return (
-                <div className="bg-blue-50 rounded-lg p-3 mt-2">
-                  <p className="text-sm text-blue-800">
+                <div className="bg-brand-50 rounded-lg p-3 mt-2">
+                  <p className="text-sm text-brand-800">
                     <span className="font-semibold">Target date: {targetStr}</span>
-                    <span className="text-blue-600 ml-1">({weeks} weeks / {Math.round(weeks / 4.3)} months)</span>
+                    <span className="text-brand-600 ml-1">({weeks} weeks / {Math.round(weeks / 4.3)} months)</span>
                   </p>
-                  <p className="text-xs text-blue-500 mt-1">
+                  <p className="text-xs text-brand-500 mt-1">
                     {current > goal ? `Lose ${diff.toFixed(1)} lbs` : `Gain ${diff.toFixed(1)} lbs`} at {rate} lb/week
                   </p>
                 </div>
@@ -270,46 +270,46 @@ export default function ProfileForm({ profile, userId, userEmail, userName }: Pr
             <div>
               <label className="block text-xs font-medium text-gray-500 mb-1">Protein (g)</label>
               <input type="number" value={form.goal_protein_g} onChange={(e) => update('goal_protein_g', e.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500" />
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-500 mb-1">Carbs (g)</label>
               <input type="number" value={form.goal_carbs_g} onChange={(e) => update('goal_carbs_g', e.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500" />
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-500 mb-1">Fat (g)</label>
               <input type="number" value={form.goal_fat_g} onChange={(e) => update('goal_fat_g', e.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500" />
             </div>
           </div>
           <div className="grid grid-cols-3 gap-3">
             <div>
               <label className="block text-xs font-medium text-gray-500 mb-1">Fiber (g)</label>
               <input type="number" value={form.goal_fiber_g} onChange={(e) => update('goal_fiber_g', e.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500" />
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-500 mb-1">Sugar (g)</label>
               <input type="number" value={form.goal_sugar_g} onChange={(e) => update('goal_sugar_g', e.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500" />
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-500 mb-1">Sodium (mg)</label>
               <input type="number" value={form.goal_sodium_mg} onChange={(e) => update('goal_sodium_mg', e.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500" />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-gray-500 mb-1">Water (oz)</label>
               <input type="number" value={form.goal_water_oz} onChange={(e) => update('goal_water_oz', e.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500" />
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-500 mb-1">Steps</label>
               <input type="number" value={form.daily_step_goal} onChange={(e) => update('daily_step_goal', e.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500" />
             </div>
           </div>
         </div>
@@ -321,7 +321,7 @@ export default function ProfileForm({ profile, userId, userEmail, userName }: Pr
         <div>
           <label className="block text-xs font-medium text-gray-500 mb-1">Unit System</label>
           <select value={form.unit_system} onChange={(e) => update('unit_system', e.target.value)}
-            className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500">
             <option value="imperial">Imperial (lbs, oz, ft)</option>
             <option value="metric">Metric (kg, ml, cm)</option>
           </select>
@@ -337,7 +337,7 @@ export default function ProfileForm({ profile, userId, userEmail, userName }: Pr
         className={`w-full flex items-center justify-center gap-2 rounded-xl px-4 py-4 text-lg font-semibold min-h-[52px] ${
           saved
             ? 'bg-green-600 text-white'
-            : 'bg-blue-600 text-white active:bg-blue-800 disabled:opacity-50'
+            : 'bg-brand-600 text-white active:bg-brand-800 disabled:opacity-50'
         }`}
       >
         <Save size={20} />

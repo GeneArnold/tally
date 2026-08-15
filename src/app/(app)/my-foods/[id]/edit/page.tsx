@@ -124,7 +124,7 @@ export default function EditFoodPage() {
 
   return (
     <div>
-      <button onClick={() => router.back()} className="flex items-center gap-1 text-blue-600 font-medium mb-4 min-h-[44px]">
+      <button onClick={() => router.back()} className="flex items-center gap-1 text-brand-600 font-medium mb-4 min-h-[44px]">
         <ArrowLeft size={20} /> Back
       </button>
       <h1 className="text-xl font-bold text-gray-900 mb-4">Edit Food</h1>
@@ -135,25 +135,25 @@ export default function EditFoodPage() {
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Food Name *</label>
           <input type="text" required value={form.description} onChange={(e) => update('description', e.target.value)}
-            className="w-full rounded-lg border-2 border-gray-300 px-4 py-3 text-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+            className="w-full rounded-lg border-2 border-gray-300 px-4 py-3 text-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent" />
         </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Brand</label>
           <input type="text" value={form.brand_name} onChange={(e) => update('brand_name', e.target.value)}
-            className="w-full rounded-lg border-2 border-gray-300 px-4 py-3 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+            className="w-full rounded-lg border-2 border-gray-300 px-4 py-3 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent" />
         </div>
 
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Serving Size</label>
             <input type="number" step="any" value={form.default_serving_size} onChange={(e) => update('default_serving_size', e.target.value)}
-              className="w-full rounded-lg border-2 border-gray-300 px-4 py-3 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+              className="w-full rounded-lg border-2 border-gray-300 px-4 py-3 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent" />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Unit</label>
             <select value={form.default_serving_unit} onChange={(e) => update('default_serving_unit', e.target.value)}
-              className="w-full rounded-lg border-2 border-gray-300 px-4 py-3 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+              className="w-full rounded-lg border-2 border-gray-300 px-4 py-3 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent">
               <option value="g">grams (g)</option>
               <option value="ml">milliliters (ml)</option>
               <option value="oz">ounces (oz)</option>
@@ -188,13 +188,13 @@ export default function EditFoodPage() {
                 <label className="block text-xs font-medium text-gray-500 mb-1">{label}</label>
                 <input type="number" step="any" value={form[key as keyof typeof form]}
                   onChange={(e) => update(key, e.target.value)} placeholder="0"
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent" />
               </div>
             ))}
             <div className="col-span-2">
               <label className="block text-xs font-medium text-gray-500 mb-1">Sodium (mg)</label>
               <input type="number" step="any" value={form.sodium_mg} onChange={(e) => update('sodium_mg', e.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent" />
             </div>
           </div>
         </div>
@@ -205,13 +205,13 @@ export default function EditFoodPage() {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Barcode</label>
             <input type="text" value={form.barcode} onChange={(e) => update('barcode', e.target.value)}
-              className="w-full rounded-lg border-2 border-gray-300 px-4 py-3 text-base text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+              className="w-full rounded-lg border-2 border-gray-300 px-4 py-3 text-base text-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent" />
           </div>
         )}
 
         <button type="submit" disabled={saving}
           className={`w-full flex items-center justify-center gap-2 rounded-xl px-4 py-4 text-lg font-semibold min-h-[52px] ${
-            saved ? 'bg-green-600 text-white' : 'bg-blue-600 text-white active:bg-blue-800 disabled:opacity-50'
+            saved ? 'bg-green-600 text-white' : 'bg-brand-600 text-white active:bg-brand-800 disabled:opacity-50'
           }`}>
           <Save size={20} />
           {saving ? 'Saving...' : saved ? 'Saved!' : 'Save Changes'}

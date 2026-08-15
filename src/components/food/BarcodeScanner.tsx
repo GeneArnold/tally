@@ -142,7 +142,7 @@ export default function BarcodeScanner({ onScan, onClose }: Props) {
               <p className="text-gray-900 font-medium">{error}</p>
               <button
                 onClick={onClose}
-                className="mt-4 bg-blue-600 text-white rounded-lg px-6 py-3 font-medium active:bg-blue-800"
+                className="mt-4 bg-brand-600 text-white rounded-lg px-6 py-3 font-medium active:bg-brand-800"
               >
                 Go Back
               </button>

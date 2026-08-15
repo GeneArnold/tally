@@ -152,7 +152,7 @@ export default function DiaryFoodEntry({ entry, diaryEntryId, date }: Props) {
         <div className="pb-3 -mt-1">
           {/* Serving editor */}
           {editing ? (
-            <div className="bg-blue-50 rounded-lg p-3 mb-3 border border-blue-200">
+            <div className="bg-brand-50 rounded-lg p-3 mb-3 border border-brand-200">
               <p className="text-sm font-medium text-gray-700 mb-2">Adjust servings</p>
               <div className="flex items-center gap-3">
                 <button
@@ -185,7 +185,7 @@ export default function DiaryFoodEntry({ entry, diaryEntryId, date }: Props) {
                   <button
                     onClick={saveQuantity}
                     disabled={saving || qty === entry.quantity}
-                    className="bg-blue-600 text-white rounded-lg px-4 py-2 text-sm font-semibold disabled:opacity-50 active:bg-blue-800 min-h-[40px] flex items-center gap-1"
+                    className="bg-brand-600 text-white rounded-lg px-4 py-2 text-sm font-semibold disabled:opacity-50 active:bg-brand-800 min-h-[40px] flex items-center gap-1"
                   >
                     <Check size={16} />
                     {saving ? '...' : 'Save'}
@@ -232,7 +232,7 @@ export default function DiaryFoodEntry({ entry, diaryEntryId, date }: Props) {
               {!editing && (
                 <button
                   onClick={() => setEditing(true)}
-                  className="flex items-center gap-1 text-xs text-blue-600 font-medium min-h-[44px] px-2"
+                  className="flex items-center gap-1 text-xs text-brand-600 font-medium min-h-[44px] px-2"
                 >
                   <Pencil size={14} />
                   Edit serving

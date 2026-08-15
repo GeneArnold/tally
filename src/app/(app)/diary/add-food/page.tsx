@@ -144,7 +144,7 @@ function AddFoodForm() {
     <div className="pb-24">
       <button
         onClick={() => router.back()}
-        className="flex items-center gap-1 text-blue-600 font-medium mb-4 min-h-[44px]"
+        className="flex items-center gap-1 text-brand-600 font-medium mb-4 min-h-[44px]"
       >
         <ArrowLeft size={20} />
         Back
@@ -161,7 +161,7 @@ function AddFoodForm() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search my foods..."
-          className="w-full rounded-lg border-2 border-gray-300 pl-10 pr-4 py-3 text-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="w-full rounded-lg border-2 border-gray-300 pl-10 pr-4 py-3 text-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
         />
       </div>
 
@@ -187,7 +187,7 @@ function AddFoodForm() {
                 }}
                 className="shrink-0 rounded-full px-3 py-1.5 text-sm font-medium min-h-[36px]"
                 style={active
-                  ? { backgroundColor: tag.color || '#3B82F6', color: 'white' }
+                  ? { backgroundColor: tag.color || '#2EA96B', color: 'white' }
                   : { backgroundColor: '#f3f4f6', color: '#4b5563' }
                 }
               >
@@ -212,11 +212,11 @@ function AddFoodForm() {
             {[...selectedFoods, ...selectedNotInResults].map((food) => {
               const sel = selected.get(food.id)!;
               return (
-                <div key={food.id} className="bg-blue-50 rounded-xl p-4 border-2 border-blue-200">
+                <div key={food.id} className="bg-brand-50 rounded-xl p-4 border-2 border-brand-200">
                   <div className="flex items-start gap-3">
                     <button
                       onClick={() => toggleFood(food)}
-                      className="w-7 h-7 rounded bg-blue-600 flex items-center justify-center shrink-0 mt-0.5"
+                      className="w-7 h-7 rounded bg-brand-600 flex items-center justify-center shrink-0 mt-0.5"
                     >
                       <Check size={16} className="text-white" />
                     </button>
@@ -264,7 +264,7 @@ function AddFoodForm() {
           <p className="text-gray-500">
             {query ? 'No foods match your search' : 'No foods in your catalog yet'}
           </p>
-          <a href="/my-foods/add" className="text-blue-600 font-medium text-sm mt-2 inline-block">
+          <a href="/my-foods/add" className="text-brand-600 font-medium text-sm mt-2 inline-block">
             Add foods to My Foods first
           </a>
         </div>
@@ -288,7 +288,7 @@ function AddFoodForm() {
                 {food.tags && food.tags.length > 0 && (
                   <div className="flex gap-1 mt-1.5 flex-wrap">
                     {food.tags.map((tag) => (
-                      <span key={tag.id} className="text-xs rounded-full px-2 py-0.5 text-white" style={{ backgroundColor: tag.color || '#3B82F6' }}>{tag.name}</span>
+                      <span key={tag.id} className="text-xs rounded-full px-2 py-0.5 text-white" style={{ backgroundColor: tag.color || '#2EA96B' }}>{tag.name}</span>
                     ))}
                   </div>
                 )}
@@ -305,7 +305,7 @@ function AddFoodForm() {
             <button
               onClick={addAllToMeal}
               disabled={adding}
-              className="w-full bg-blue-600 text-white rounded-xl px-4 py-4 text-lg font-semibold shadow-lg active:bg-blue-800 disabled:opacity-50 min-h-[56px] flex items-center justify-center gap-2"
+              className="w-full bg-brand-600 text-white rounded-xl px-4 py-4 text-lg font-semibold shadow-lg active:bg-brand-800 disabled:opacity-50 min-h-[56px] flex items-center justify-center gap-2"
             >
               {adding
                 ? 'Adding...'

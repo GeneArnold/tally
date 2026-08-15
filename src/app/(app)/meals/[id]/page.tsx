@@ -151,7 +151,7 @@ export default function MealDetailPage() {
 
   return (
     <div className="pb-24">
-      <button onClick={() => { window.location.href = '/meals'; }} className="flex items-center gap-1 text-blue-600 font-medium mb-4 min-h-[44px]">
+      <button onClick={() => { window.location.href = '/meals'; }} className="flex items-center gap-1 text-brand-600 font-medium mb-4 min-h-[44px]">
         <ArrowLeft size={20} /> Meals
       </button>
 
@@ -172,9 +172,9 @@ export default function MealDetailPage() {
               setEditType(meal.default_meal_type || '');
               setShowEdit(true);
             }}
-            className="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center active:bg-blue-200"
+            className="w-9 h-9 rounded-full bg-brand-100 flex items-center justify-center active:bg-brand-200"
           >
-            <Pencil size={16} className="text-blue-600" />
+            <Pencil size={16} className="text-brand-600" />
           </button>
         </div>
       </div>
@@ -227,7 +227,7 @@ export default function MealDetailPage() {
               }
             }}
             disabled={savingTags}
-            className="mt-3 w-full bg-blue-600 text-white rounded-lg px-4 py-2.5 text-sm font-semibold active:bg-blue-800 disabled:opacity-50 min-h-[44px]"
+            className="mt-3 w-full bg-brand-600 text-white rounded-lg px-4 py-2.5 text-sm font-semibold active:bg-brand-800 disabled:opacity-50 min-h-[44px]"
           >
             {savingTags ? 'Saving...' : 'Save Tags'}
           </button>
@@ -258,7 +258,7 @@ export default function MealDetailPage() {
         ))}
         <Link
           href={`/meals/${mealId}/add-foods`}
-          className="block px-4 py-3 text-blue-600 text-sm font-medium active:bg-gray-50 min-h-[44px] flex items-center gap-1"
+          className="block px-4 py-3 text-brand-600 text-sm font-medium active:bg-gray-50 min-h-[44px] flex items-center gap-1"
         >
           <Plus size={16} /> Add more foods
         </Link>
@@ -273,7 +273,7 @@ export default function MealDetailPage() {
               key={t}
               onClick={() => setLogSlot(t)}
               className={`flex-1 rounded-lg py-2 text-sm font-medium min-h-[40px] ${
-                logSlot === t ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600'
+                logSlot === t ? 'bg-brand-600 text-white' : 'bg-gray-100 text-gray-600'
               }`}
             >
               {t}
@@ -346,7 +346,7 @@ export default function MealDetailPage() {
                   type="text"
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
-                  className="w-full rounded-lg border-2 border-gray-300 px-4 py-3 text-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full rounded-lg border-2 border-gray-300 px-4 py-3 text-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                 />
               </div>
 
@@ -357,7 +357,7 @@ export default function MealDetailPage() {
                   value={editDesc}
                   onChange={(e) => setEditDesc(e.target.value)}
                   placeholder="Optional note about this meal"
-                  className="w-full rounded-lg border-2 border-gray-300 px-4 py-3 text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full rounded-lg border-2 border-gray-300 px-4 py-3 text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                 />
               </div>
 
@@ -366,7 +366,7 @@ export default function MealDetailPage() {
                 <select
                   value={editType}
                   onChange={(e) => setEditType(e.target.value)}
-                  className="w-full rounded-lg border-2 border-gray-300 px-4 py-3 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full rounded-lg border-2 border-gray-300 px-4 py-3 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
                 >
                   <option value="">No default</option>
                   {MEAL_TYPES.map((t) => (
@@ -405,7 +405,7 @@ export default function MealDetailPage() {
                   }
                 }}
                 disabled={savingEdit || !editName.trim()}
-                className="w-full bg-blue-600 text-white rounded-lg px-4 py-3.5 text-base font-semibold active:bg-blue-800 disabled:opacity-50 min-h-[52px]"
+                className="w-full bg-brand-600 text-white rounded-lg px-4 py-3.5 text-base font-semibold active:bg-brand-800 disabled:opacity-50 min-h-[52px]"
               >
                 {savingEdit ? 'Saving...' : 'Save Changes'}
               </button>

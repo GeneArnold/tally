@@ -80,7 +80,7 @@ export default function DashboardPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <img src="/nexus-logo.png" alt="Tally" className="w-10 h-10 rounded-lg" />
+          <img src="/tally-mark.svg" alt="Tally" className="w-10 h-10" />
           <div>
             <h1 className="text-lg font-bold text-gray-900">
               Hi, {data.user.first_name || 'there'}
@@ -106,7 +106,7 @@ export default function DashboardPage() {
             className="h-full rounded-full transition-all duration-500"
             style={{
               width: `${calPct}%`,
-              backgroundColor: calPct > 100 ? '#ef4444' : calPct > 80 ? '#f59e0b' : '#3b82f6',
+              backgroundColor: calPct > 100 ? '#ef4444' : calPct > 80 ? '#f59e0b' : '#2EA96B',
             }}
           />
         </div>
@@ -141,10 +141,10 @@ export default function DashboardPage() {
 
       {/* Setup prompt if no profile */}
       {!data.hasProfile && (
-        <div className="mt-4 bg-blue-50 border border-blue-200 rounded-xl p-4">
-          <p className="text-sm font-medium text-blue-800">Set up your profile</p>
-          <p className="text-xs text-blue-600 mt-1">Add your goals and targets to personalize your dashboard.</p>
-          <Link href="/profile" className="inline-block mt-2 text-sm font-semibold text-blue-700 active:text-blue-900">
+        <div className="mt-4 bg-brand-50 border border-brand-200 rounded-xl p-4">
+          <p className="text-sm font-medium text-brand-800">Set up your profile</p>
+          <p className="text-xs text-brand-600 mt-1">Add your goals and targets to personalize your dashboard.</p>
+          <Link href="/profile" className="inline-block mt-2 text-sm font-semibold text-brand-700 active:text-brand-900">
             Go to Profile &rarr;
           </Link>
         </div>

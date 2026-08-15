@@ -348,7 +348,7 @@ export default function AddFoodPage() {
     return (
       <div>
         {cameraInput}
-        <button onClick={() => router.back()} className="flex items-center gap-1 text-blue-600 font-medium mb-4 min-h-[44px]">
+        <button onClick={() => router.back()} className="flex items-center gap-1 text-brand-600 font-medium mb-4 min-h-[44px]">
           <ArrowLeft size={20} /> Back
         </button>
         <h1 className="text-xl font-bold text-gray-900 mb-6">Add a Food</h1>
@@ -356,7 +356,7 @@ export default function AddFoodPage() {
         <div className="space-y-3">
           <button
             onClick={() => setMode('ai-choose')}
-            className="w-full bg-gradient-to-r from-purple-50 to-blue-50 border-2 border-purple-200 rounded-xl p-5 active:bg-purple-100 text-left flex items-center gap-4 min-h-[72px]"
+            className="w-full bg-gradient-to-r from-purple-50 to-brand-50 border-2 border-purple-200 rounded-xl p-5 active:bg-purple-100 text-left flex items-center gap-4 min-h-[72px]"
           >
             <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center shrink-0">
               <Sparkles size={24} className="text-purple-600" />
@@ -397,8 +397,8 @@ export default function AddFoodPage() {
             onClick={() => setMode('manual')}
             className="w-full bg-white rounded-xl p-5 shadow-sm active:bg-gray-50 text-left flex items-center gap-4 min-h-[72px]"
           >
-            <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center shrink-0">
-              <Keyboard size={24} className="text-blue-600" />
+            <div className="w-12 h-12 bg-brand-100 rounded-full flex items-center justify-center shrink-0">
+              <Keyboard size={24} className="text-brand-600" />
             </div>
             <div>
               <p className="font-semibold text-gray-900 text-base">Enter Manually</p>
@@ -415,7 +415,7 @@ export default function AddFoodPage() {
     return (
       <div>
         {cameraInput}
-        <button onClick={() => setMode('choose')} className="flex items-center gap-1 text-blue-600 font-medium mb-4 min-h-[44px]">
+        <button onClick={() => setMode('choose')} className="flex items-center gap-1 text-brand-600 font-medium mb-4 min-h-[44px]">
           <ArrowLeft size={20} /> Back
         </button>
         <h1 className="text-xl font-bold text-gray-900 mb-2">AI Assist</h1>
@@ -426,8 +426,8 @@ export default function AddFoodPage() {
             onClick={() => { setMode('ai-describe'); setAiDescribe(''); setError(''); }}
             className="w-full bg-white rounded-xl p-5 shadow-sm active:bg-gray-50 text-left flex items-center gap-4 min-h-[72px]"
           >
-            <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center shrink-0">
-              <MessageSquare size={24} className="text-blue-600" />
+            <div className="w-12 h-12 bg-brand-100 rounded-full flex items-center justify-center shrink-0">
+              <MessageSquare size={24} className="text-brand-600" />
             </div>
             <div>
               <p className="font-semibold text-gray-900 text-base">Describe a Food</p>
@@ -482,7 +482,7 @@ export default function AddFoodPage() {
   if (mode === 'ai-describe') {
     return (
       <div>
-        <button onClick={() => { setMode('ai-choose'); setAiDescribe(''); setError(''); }} className="flex items-center gap-1 text-blue-600 font-medium mb-4 min-h-[44px]">
+        <button onClick={() => { setMode('ai-choose'); setAiDescribe(''); setError(''); }} className="flex items-center gap-1 text-brand-600 font-medium mb-4 min-h-[44px]">
           <ArrowLeft size={20} /> Back
         </button>
         <h1 className="text-xl font-bold text-gray-900 mb-2">Describe a Food</h1>
@@ -497,7 +497,7 @@ export default function AddFoodPage() {
             onChange={(e) => setAiDescribe(e.target.value)}
             placeholder="e.g. scrambled eggs, banana, slice of pizza..."
             autoFocus
-            className="w-full rounded-lg border-2 border-gray-300 px-4 py-3.5 text-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full rounded-lg border-2 border-gray-300 px-4 py-3.5 text-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
           />
 
           <p className="text-xs text-gray-400 mt-2 mb-4">
@@ -509,7 +509,7 @@ export default function AddFoodPage() {
           <button
             type="submit"
             disabled={aiParsing || !aiDescribe.trim()}
-            className="w-full bg-blue-600 text-white rounded-lg px-4 py-4 text-lg font-semibold active:bg-blue-800 disabled:opacity-50 min-h-[52px] flex items-center justify-center gap-2"
+            className="w-full bg-brand-600 text-white rounded-lg px-4 py-4 text-lg font-semibold active:bg-brand-800 disabled:opacity-50 min-h-[52px] flex items-center justify-center gap-2"
           >
             <Sparkles size={20} />
             {aiParsing ? 'Looking up nutrition...' : 'Look Up'}
@@ -523,7 +523,7 @@ export default function AddFoodPage() {
   if (mode === 'ai-text') {
     return (
       <div>
-        <button onClick={() => { setMode('ai-choose'); setAiText(''); setError(''); }} className="flex items-center gap-1 text-blue-600 font-medium mb-4 min-h-[44px]">
+        <button onClick={() => { setMode('ai-choose'); setAiText(''); setError(''); }} className="flex items-center gap-1 text-brand-600 font-medium mb-4 min-h-[44px]">
           <ArrowLeft size={20} /> Back
         </button>
         <h1 className="text-xl font-bold text-gray-900 mb-2">Paste Nutrition Info</h1>
@@ -561,7 +561,7 @@ export default function AddFoodPage() {
     return (
       <div>
         {cameraInput}
-        <button onClick={() => { setMode('ai-choose'); setPhotoBase64(''); setPhotoContext(''); setError(''); }} className="flex items-center gap-1 text-blue-600 font-medium mb-4 min-h-[44px]">
+        <button onClick={() => { setMode('ai-choose'); setPhotoBase64(''); setPhotoContext(''); setError(''); }} className="flex items-center gap-1 text-brand-600 font-medium mb-4 min-h-[44px]">
           <ArrowLeft size={20} /> Back
         </button>
         <h1 className="text-xl font-bold text-gray-900 mb-4">Photo Analysis</h1>
@@ -606,7 +606,7 @@ export default function AddFoodPage() {
             value={photoContext}
             onChange={(e) => setPhotoContext(e.target.value)}
             placeholder="e.g. Kirkland Protein Bar, Kind Bar..."
-            className="w-full rounded-lg border-2 border-gray-300 px-4 py-3 text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full rounded-lg border-2 border-gray-300 px-4 py-3 text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
           />
           <p className="text-xs text-gray-400 mt-1">Helps the AI identify the product and fill in details</p>
         </div>
@@ -644,13 +644,13 @@ export default function AddFoodPage() {
   if (mode === 'usda') {
     return (
       <div>
-        <button onClick={() => setMode('choose')} className="flex items-center gap-1 text-blue-600 font-medium mb-4 min-h-[44px]">
+        <button onClick={() => setMode('choose')} className="flex items-center gap-1 text-brand-600 font-medium mb-4 min-h-[44px]">
           <ArrowLeft size={20} /> Back
         </button>
         <h1 className="text-xl font-bold text-gray-900 mb-4">Search USDA Database</h1>
         <form onSubmit={searchUSDA} className="flex gap-2 mb-4">
           <input type="text" value={usdaQuery} onChange={(e) => setUsdaQuery(e.target.value)} placeholder="e.g. chicken breast, banana..." autoFocus
-            className="flex-1 rounded-lg border-2 border-gray-300 px-4 py-3 text-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+            className="flex-1 rounded-lg border-2 border-gray-300 px-4 py-3 text-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent" />
           <button type="submit" disabled={searching || !usdaQuery.trim()}
             className="bg-green-600 text-white rounded-lg px-4 min-w-[52px] min-h-[52px] flex items-center justify-center disabled:opacity-50 active:bg-green-800">
             <Search size={22} />
@@ -671,7 +671,7 @@ export default function AddFoodPage() {
                 <span>C {food.carbs_g}g</span>
                 <span>F {food.fat_g}g</span>
               </div>
-              <p className="text-xs text-blue-600 mt-2 font-medium">Tap to import &rarr;</p>
+              <p className="text-xs text-brand-600 mt-2 font-medium">Tap to import &rarr;</p>
             </button>
           ))}
         </div>
@@ -714,7 +714,7 @@ export default function AddFoodPage() {
   if (mode === 'barcode') {
     return (
       <div>
-        <button onClick={() => setMode('choose')} className="flex items-center gap-1 text-blue-600 font-medium mb-4 min-h-[44px]">
+        <button onClick={() => setMode('choose')} className="flex items-center gap-1 text-brand-600 font-medium mb-4 min-h-[44px]">
           <ArrowLeft size={20} /> Back
         </button>
         <h1 className="text-xl font-bold text-gray-900 mb-4">Barcode Lookup</h1>
@@ -736,7 +736,7 @@ export default function AddFoodPage() {
         <form onSubmit={lookupBarcode} className="flex gap-2 mb-4">
           <input type="text" inputMode="numeric" value={barcodeInput} onChange={(e) => setBarcodeInput(e.target.value)}
             placeholder="Enter UPC number"
-            className="flex-1 rounded-lg border-2 border-gray-300 px-4 py-3 text-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+            className="flex-1 rounded-lg border-2 border-gray-300 px-4 py-3 text-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent" />
           <button type="submit" disabled={barcodeSearching || !barcodeInput.trim()}
             className="bg-gray-700 text-white rounded-lg px-4 min-w-[52px] min-h-[52px] flex items-center justify-center disabled:opacity-50 active:bg-gray-900">
             <Search size={22} />
@@ -786,7 +786,7 @@ export default function AddFoodPage() {
                 <span>C {barcodeResult.carbs_g}g</span>
                 <span>F {barcodeResult.fat_g}g</span>
               </div>
-              <p className="text-xs text-blue-600 mt-2 font-medium">Tap to import &rarr;</p>
+              <p className="text-xs text-brand-600 mt-2 font-medium">Tap to import &rarr;</p>
             </button>
           </div>
         )}
@@ -803,7 +803,7 @@ export default function AddFoodPage() {
 
   return (
     <div>
-      <button onClick={() => { resetForm(); setMode('choose'); }} className="flex items-center gap-1 text-blue-600 font-medium mb-4 min-h-[44px]">
+      <button onClick={() => { resetForm(); setMode('choose'); }} className="flex items-center gap-1 text-brand-600 font-medium mb-4 min-h-[44px]">
         <ArrowLeft size={20} /> Back
       </button>
       <h1 className="text-xl font-bold text-gray-900 mb-4">
@@ -817,14 +817,14 @@ export default function AddFoodPage() {
           <label className="block text-sm font-medium text-gray-700 mb-1">Food Name *</label>
           <input type="text" required value={form.description} onChange={(e) => updateForm('description', e.target.value)}
             placeholder="e.g. Chicken Breast, Grilled"
-            className="w-full rounded-lg border-2 border-gray-300 px-4 py-3 text-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+            className="w-full rounded-lg border-2 border-gray-300 px-4 py-3 text-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent" />
         </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Brand (optional)</label>
           <input type="text" value={form.brand_name} onChange={(e) => updateForm('brand_name', e.target.value)}
             placeholder="e.g. Tyson, Applebee's"
-            className="w-full rounded-lg border-2 border-gray-300 px-4 py-3 text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+            className="w-full rounded-lg border-2 border-gray-300 px-4 py-3 text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent" />
         </div>
 
         <div className="grid grid-cols-2 gap-3">
@@ -832,12 +832,12 @@ export default function AddFoodPage() {
             <label className="block text-sm font-medium text-gray-700 mb-1">Serving Size</label>
             <input type="number" step="any" value={form.default_serving_size} onChange={(e) => updateForm('default_serving_size', e.target.value)}
               placeholder="100"
-              className="w-full rounded-lg border-2 border-gray-300 px-4 py-3 text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+              className="w-full rounded-lg border-2 border-gray-300 px-4 py-3 text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent" />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Unit</label>
             <select value={form.default_serving_unit} onChange={(e) => updateForm('default_serving_unit', e.target.value)}
-              className="w-full rounded-lg border-2 border-gray-300 px-4 py-3 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+              className="w-full rounded-lg border-2 border-gray-300 px-4 py-3 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent">
               <option value="g">grams (g)</option>
               <option value="ml">milliliters (ml)</option>
               <option value="oz">ounces (oz)</option>
@@ -872,14 +872,14 @@ export default function AddFoodPage() {
                 <label className="block text-xs font-medium text-gray-500 mb-1">{label}</label>
                 <input type="number" step="any" value={form[key as keyof typeof form]}
                   onChange={(e) => updateForm(key, e.target.value)} placeholder="0"
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent" />
               </div>
             ))}
             <div className="col-span-2">
               <label className="block text-xs font-medium text-gray-500 mb-1">Sodium (mg)</label>
               <input type="number" step="any" value={form.sodium_mg} onChange={(e) => updateForm('sodium_mg', e.target.value)}
                 placeholder="0"
-                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent" />
             </div>
           </div>
         </div>
@@ -891,7 +891,7 @@ export default function AddFoodPage() {
         )}
 
         <button type="submit" disabled={saving}
-          className="w-full bg-blue-600 text-white rounded-lg px-4 py-4 text-lg font-semibold hover:bg-blue-700 active:bg-blue-800 disabled:opacity-50 min-h-[52px]">
+          className="w-full bg-brand-600 text-white rounded-lg px-4 py-4 text-lg font-semibold hover:bg-brand-700 active:bg-brand-800 disabled:opacity-50 min-h-[52px]">
           {saving ? 'Saving...' : 'Save to My Foods'}
         </button>
       </form>

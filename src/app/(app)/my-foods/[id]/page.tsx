@@ -71,7 +71,7 @@ export default async function FoodDetailPage({ params, searchParams }: Props) {
         </div>
         <Link
           href={`/my-foods/${id}/edit`}
-          className="shrink-0 bg-blue-600 text-white rounded-lg px-3 py-2 text-sm font-medium flex items-center gap-1.5 active:bg-blue-800 min-h-[44px]"
+          className="shrink-0 bg-brand-600 text-white rounded-lg px-3 py-2 text-sm font-medium flex items-center gap-1.5 active:bg-brand-800 min-h-[44px]"
         >
           <Pencil size={16} />
           Edit
@@ -107,7 +107,7 @@ export default async function FoodDetailPage({ params, searchParams }: Props) {
       {tagRows.length > 0 && (
         <div className="mt-4 flex gap-2 flex-wrap">
           {tagRows.map((tag) => (
-            <span key={tag.id} className="text-sm rounded-full px-3 py-1 text-white" style={{ backgroundColor: tag.color || '#3B82F6' }}>{tag.name}</span>
+            <span key={tag.id} className="text-sm rounded-full px-3 py-1 text-white" style={{ backgroundColor: tag.color || '#2EA96B' }}>{tag.name}</span>
           ))}
         </div>
       )}
