@@ -6,6 +6,7 @@ import ProfileForm from '@/components/profile/ProfileForm';
 import WeightChart from '@/components/profile/WeightChart';
 import TagManager from '@/components/profile/TagManager';
 import LogoutButton from '@/components/profile/LogoutButton';
+import ChangePassword from '@/components/profile/ChangePassword';
 
 export const dynamic = 'force-dynamic';
 
@@ -89,8 +90,13 @@ export default async function ProfilePage() {
         userName={`${session.user.first_name || ''} ${session.user.last_name || ''}`.trim()}
       />
 
-      {/* Logout */}
+      {/* Change Password */}
       <div className="mt-8">
+        <ChangePassword />
+      </div>
+
+      {/* Logout */}
+      <div className="mt-4">
         <LogoutButton />
       </div>
     </div>

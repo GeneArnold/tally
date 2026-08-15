@@ -1,7 +1,7 @@
 services:
-  nexus-health:
+  tally:
     build: .
-    container_name: nexus-health
+    container_name: tally
     restart: unless-stopped
     ports:
       - "8060:3000"

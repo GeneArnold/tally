@@ -2,7 +2,7 @@
  * Migrate data from Directus production to local SQLite database.
  *
  * Usage:
- *   DIRECTUS_URL=http://192.168.40.51:8057 DIRECTUS_TOKEN=<admin-token> npx tsx scripts/migrate-from-directus.ts
+ *   DIRECTUS_URL=http://your-directus:8055 DIRECTUS_TOKEN=<admin-token> npx tsx scripts/migrate-from-directus.ts
  *
  * This script:
  * 1. Fetches all data from Directus REST API
@@ -18,11 +18,12 @@ import bcrypt from 'bcryptjs';
 import path from 'path';
 import fs from 'fs';
 
-const DIRECTUS_URL = process.env.DIRECTUS_URL || 'http://192.168.40.51:8057';
+const DIRECTUS_URL = process.env.DIRECTUS_URL;
 const DIRECTUS_TOKEN = process.env.DIRECTUS_TOKEN;
 
-if (!DIRECTUS_TOKEN) {
-  console.error('DIRECTUS_TOKEN is required. Get an admin static token from Directus.');
+if (!DIRECTUS_URL || !DIRECTUS_TOKEN) {
+  console.error('DIRECTUS_URL and DIRECTUS_TOKEN are required.');
+  console.error('Usage: DIRECTUS_URL=http://your-directus:8055 DIRECTUS_TOKEN=<admin-token> npx tsx scripts/migrate-from-directus.ts');
   process.exit(1);
 }
 

@@ -1,6 +1,10 @@
 import { NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth';
 import { getProvider } from '@/lib/ai-providers';
+import { checkRateLimit } from '@/lib/rate-limit';
+
+const AI_DAILY_LIMIT = 50;
+const AI_WINDOW_MS = 24 * 60 * 60 * 1000;
 
 const SYSTEM_PROMPT = `You are a nutrition data extraction assistant. Extract structured food nutrition information from user input (text or images).
 
@@ -32,6 +36,15 @@ Rules:
 export async function POST(request: Request) {
   const session = await getSession();
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+  const { allowed, retryAfterMs } = checkRateLimit(`ai:${session.user.id}`, AI_DAILY_LIMIT, AI_WINDOW_MS);
+  if (!allowed) {
+    const hours = Math.ceil(retryAfterMs / (1000 * 60 * 60));
+    return NextResponse.json(
+      { error: `Daily AI limit reached (${AI_DAILY_LIMIT} requests). Try again in ~${hours} hour${hours > 1 ? 's' : ''}.` },
+      { status: 429, headers: { 'Retry-After': String(Math.ceil(retryAfterMs / 1000)) } },
+    );
+  }
 
   try {
     const body = await request.json();

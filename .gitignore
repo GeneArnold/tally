@@ -30,8 +30,9 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
+# env files
 .env*
+!.env.example
 
 # vercel
 .vercel
@@ -42,3 +43,7 @@ next-env.d.ts
 
 # database
 /data/
+
+# infrastructure docs (contain IPs, tunnel IDs, internal hostnames)
+docs/cloudflare-tunnel-setup.md
+docs/archive/
