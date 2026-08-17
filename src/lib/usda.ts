@@ -81,30 +81,6 @@ export async function searchUSDA(query: string, limit = 10, dataTypes?: string[]
   };
 }
 
-export async function lookupBarcodeUSDA(upc: string): Promise<StrippedFood | null> {
-  const res = await fetch(`${USDA_BASE_URL}/foods/search?api_key=${USDA_API_KEY}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      query: upc,
-      pageSize: 3,
-      dataType: ['Branded'],
-    }),
-  });
-
-  if (!res.ok) return null;
-
-  const data = await res.json();
-  const foods = (data.foods || []) as Record<string, unknown>[];
-
-  const exactMatch = foods.find((f) => f.gtinUpc === upc);
-  if (exactMatch) return stripFood(exactMatch);
-
-  if (foods.length > 0) return stripFood(foods[0]);
-
-  return null;
-}
-
 export async function lookupBarcodeOpenFoodFacts(upc: string): Promise<StrippedFood | null> {
   const res = await fetch(
     `http://world.openfoodfacts.org/api/v2/product/${upc}.json?fields=product_name,brands,serving_size,serving_quantity,nutriments`,
@@ -136,9 +112,6 @@ export async function lookupBarcodeOpenFoodFacts(upc: string): Promise<StrippedF
   };
 }
 
-// Legacy single-call lookup (used by /api/food/barcode/[upc])
 export async function lookupBarcode(upc: string): Promise<StrippedFood | null> {
-  const usda = await lookupBarcodeUSDA(upc);
-  if (usda) return usda;
   return lookupBarcodeOpenFoodFacts(upc);
 }

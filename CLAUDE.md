@@ -7,6 +7,7 @@
 - **Foods are the atomic unit** — everything is a food (broccoli, Applebee's Hamburger Dinner)
 - **Meals are shortcuts** — named groups of foods for quick logging, no nutrition on the meal itself
 - **My Foods is source of truth** — diary logs from local foods only, not USDA directly
+- **Barcode lookup uses Open Food Facts only** — USDA search API doesn't support UPC lookup (always returns 0 hits). Coverage is limited (~37% of US products); fallback is AI photo of nutrition label
 - **Tags are M2M relational** — foods ↔ foods_food_tags ↔ food_tags, CASCADE both sides
 - **AI providers: cheapest first** — Groq `openai/gpt-oss-20b` (text, ~$0.08/M tokens) → Gemini Flash 2.5 (vision) → Anthropic Haiku (fallback). Gemini is too slow (~5s) and ignores JSON schema for text tasks.
 - **Soft delete** on foods, meals, food_tags, journal_entries via `deleted_at` timestamp
@@ -37,6 +38,7 @@
 | `src/lib/db/index.ts` | Lazy DB connection |
 | `src/lib/db/helpers.ts` | `recalcDiaryTotals()` shared by diary routes |
 | `src/lib/auth.ts` | Login, signup, logout, getSession, JWT signing |
+| `src/lib/usda.ts` | USDA text search + Open Food Facts barcode lookup |
 | `src/lib/ai-providers.ts` | AI vendor abstraction — Groq (text), Gemini (vision), Anthropic (fallback) |
 | `src/lib/rate-limit.ts` | In-memory rate limiter (login + AI endpoints) |
 | `src/middleware.ts` | Auth guard — checks cookie, redirects to login |

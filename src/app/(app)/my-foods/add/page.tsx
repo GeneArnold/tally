@@ -151,7 +151,7 @@ export default function AddFoodPage() {
     const upc = barcodeInput.trim();
 
     try {
-      setBarcodeStep('Searching USDA & Open Food Facts...');
+      setBarcodeStep('Searching Open Food Facts...');
 
       const res = await fetch(`/api/food/barcode-lookup?upc=${encodeURIComponent(upc)}`);
       const data = await res.json();
@@ -164,7 +164,7 @@ export default function AddFoodPage() {
       }
 
       setBarcodeStep('');
-      setError('Not found in USDA or Open Food Facts. Try photographing the nutrition label instead.');
+      setError('Not found in Open Food Facts. Try photographing the nutrition label instead.');
     } catch (err) {
       setError(`Lookup error: ${err instanceof Error ? err.message : String(err)}`);
     } finally {
@@ -749,21 +749,6 @@ export default function AddFoodPage() {
             <div className="flex flex-col items-center gap-3">
               <div className="w-10 h-10 border-4 border-gray-200 border-t-orange-600 rounded-full animate-spin" />
               <p className="text-base text-gray-700 font-medium text-center">{barcodeStep}</p>
-              {barcodeStep.includes('Open Food') && (
-                <p className="text-xs text-gray-400">This can take up to 15 seconds...</p>
-              )}
-            </div>
-            <div className="mt-6 space-y-3 px-4">
-              <div className="flex items-center gap-3 text-sm">
-                <div className={`w-3 h-3 rounded-full ${barcodeStep.includes('Not in USDA') ? 'bg-red-400' : barcodeStep.includes('USDA') ? 'bg-orange-500 animate-pulse' : 'bg-green-500'}`} />
-                <span className="text-gray-700">USDA FoodData Central</span>
-                {barcodeStep.includes('Not in USDA') && <span className="text-xs text-red-400 ml-auto">not found</span>}
-                {!barcodeStep.includes('USDA') && !barcodeStep.includes('Not in USDA') && <span className="text-xs text-green-500 ml-auto">found!</span>}
-              </div>
-              <div className="flex items-center gap-3 text-sm">
-                <div className={`w-3 h-3 rounded-full ${barcodeStep.includes('Open Food') ? 'bg-green-500 animate-pulse' : 'bg-gray-300'}`} />
-                <span className={barcodeStep.includes('Open Food') ? 'text-gray-700' : 'text-gray-400'}>Open Food Facts (800K+ products)</span>
-              </div>
             </div>
           </div>
         )}
