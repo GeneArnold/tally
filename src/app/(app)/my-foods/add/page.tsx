@@ -775,6 +775,8 @@ export default function AddFoodPage() {
             </button>
           </div>
         )}
+
+        <p className="text-xs text-gray-400 text-center mt-6">Powered by FatSecret</p>
       </div>
     );
   }

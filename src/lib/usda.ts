@@ -112,6 +112,15 @@ export async function lookupBarcodeOpenFoodFacts(upc: string): Promise<StrippedF
   };
 }
 
-export async function lookupBarcode(upc: string): Promise<StrippedFood | null> {
-  return lookupBarcodeOpenFoodFacts(upc);
+export async function lookupBarcode(upc: string): Promise<{ food: StrippedFood; source: string } | null> {
+  if (process.env.FATSECRET_CLIENT_ID) {
+    const { lookupBarcodeFatSecret } = await import('./fatsecret');
+    const fs = await lookupBarcodeFatSecret(upc);
+    if (fs) return { food: fs, source: 'FatSecret' };
+  }
+
+  const off = await lookupBarcodeOpenFoodFacts(upc);
+  if (off) return { food: off, source: 'Open Food Facts' };
+
+  return null;
 }

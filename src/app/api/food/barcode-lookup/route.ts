@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { lookupBarcodeOpenFoodFacts } from '@/lib/usda';
+import { lookupBarcode } from '@/lib/usda';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -10,9 +10,9 @@ export async function GET(request: Request) {
   }
 
   try {
-    const result = await lookupBarcodeOpenFoodFacts(upc);
+    const result = await lookupBarcode(upc);
     if (result) {
-      return NextResponse.json({ food: result, source: 'Open Food Facts' });
+      return NextResponse.json({ food: result.food, source: result.source });
     }
 
     return NextResponse.json({ food: null, source: null }, { status: 404 });

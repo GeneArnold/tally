@@ -14,7 +14,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ upc
       );
     }
 
-    return NextResponse.json(result);
+    return NextResponse.json({ ...result.food, source: result.source });
   } catch (err) {
     return NextResponse.json(
       { error: `Lookup failed: ${err instanceof Error ? err.message : 'Unknown error'}` },
