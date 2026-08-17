@@ -14,7 +14,7 @@ Building an AI-powered app doesn't mean paying $500/month in API costs. I built 
 
 ## Section 1: What the App Does
 
-**Nexus Health** — a mobile-first Progressive Web App for health and nutrition tracking.
+**Tally** — a mobile-first Progressive Web App for health and nutrition tracking.
 
 Key AI features:
 - **Describe a Food** — type "scrambled eggs" and AI estimates the full nutrition profile (calories, protein, carbs, fat, fiber, sodium)
@@ -174,7 +174,7 @@ You don't need a $500/month OpenAI bill to build AI features. The landscape has 
 
 ## Key Facts for the Article
 
-- **App name:** Nexus Health
+- **App name:** Tally
 - **Built in:** 2 sessions with Claude Code (AI-assisted development)
 - **Lines of code:** ~12,000+
 - **AI providers:** 3 (Groq, Gemini, Anthropic)

@@ -3,7 +3,7 @@
 **Date:** 2026-08-15
 **Commit:** `430d500` — "fix: Add password visibility toggle to confirm password field"
 **Repo (GitHub):** https://github.com/GeneArnold/tally
-**Repo (Gitea):** https://gitea.home/garnold/nexus-health.git
+**Repo (Gitea):** https://gitea.home/garnold/tally.git
 **Running at:** https://tally.genearnold.ai (Cloudflare Tunnel) and http://192.168.40.51:8060 (direct)
 **Docker container:** `tally` on nexus (192.168.40.51)
 
@@ -12,7 +12,7 @@
 ### Rename
 - Renamed app from "Nexus Health" to **Tally** — *your food, your goals, your data*
 - Updated login, signup, dashboard, layout title, PWA manifest (Tier 1 — user-facing)
-- Docker service renamed from `nexus-health` to `tally` in docker-compose.yml
+- Docker service renamed to `tally` in docker-compose.yml
 - README, CLAUDE.md rewritten for public consumption
 - Stale Directus-era docs archived to `docs/archive/` (gitignored)
 
@@ -61,17 +61,14 @@
 
 4. **Protect signup endpoint** — Cloudflare Access gates the app, but the app itself allows open signup at `/api/auth/signup`. Consider adding invite codes or disabling public signup.
 
-5. **Tier 2/3 rename leftovers:**
-   - Gitea repo still named `nexus-health`
-   - `docs/article-ai-cost-zero.md` still references "Nexus Health"
-   - `.claude/settings.local.json` has old permission entries (local only, not in repo)
+5. **Tier 2/3 rename leftovers:** All resolved — Gitea repo renamed, docs updated, deploy paths fixed.
 
 ## Architecture Notes
 
-- **Two git remotes:** `origin` = Gitea (`nexus-health`), `github` = GitHub (`tally`). Push to both.
+- **Two git remotes:** `origin` = Gitea (`tally`), `github` = GitHub (`tally`). Push to both.
 - **Cloudflare Tunnel config:** `/etc/cloudflared/config.yml` on nexus. Restart with `sudo systemctl restart cloudflared`.
-- **Deploy command:** rsync to `garnold@192.168.40.51:/opt/docker_deploy/nexus-health/` then `docker compose up -d --build`
-- **Container name changed:** now `tally`, not `nexus-health`. Old container was manually stopped and removed.
+- **Deploy:** `cd /opt/docker_deploy/tally && git pull && docker compose up -d --build`
+- **Container name:** `tally`
 - **Docker volume:** `health-data` persists the SQLite database across rebuilds. The volume name didn't change.
 
 ## Files Added/Changed This Session
