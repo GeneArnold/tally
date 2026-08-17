@@ -7,7 +7,7 @@
 - **Foods are the atomic unit** — everything is a food (broccoli, Applebee's Hamburger Dinner)
 - **Meals are shortcuts** — named groups of foods for quick logging, no nutrition on the meal itself
 - **My Foods is source of truth** — diary logs from local foods only, not USDA directly
-- **Barcode lookup: FatSecret → Open Food Facts** — FatSecret is primary (90% coverage, requires IP whitelist + attribution), OFF is fallback. USDA was removed (search API doesn't support UPC lookup)
+- **Barcode lookup: Open Food Facts** — FatSecret integration built but dormant (requires Premier tier for barcode scope). OFF is the active provider. USDA was removed (search API doesn't support UPC lookup)
 - **Tags are M2M relational** — foods ↔ foods_food_tags ↔ food_tags, CASCADE both sides
 - **AI providers: cheapest first** — Groq `openai/gpt-oss-20b` (text, ~$0.08/M tokens) → Gemini Flash 2.5 (vision) → Anthropic Haiku (fallback). Gemini is too slow (~5s) and ignores JSON schema for text tasks.
 - **Soft delete** on foods, meals, food_tags, journal_entries via `deleted_at` timestamp
