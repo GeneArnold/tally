@@ -8,7 +8,7 @@
 - **Meals are shortcuts** — named groups of foods for quick logging, no nutrition on the meal itself
 - **My Foods is source of truth** — diary logs from local foods only, not USDA directly
 - **Tags are M2M relational** — foods ↔ foods_food_tags ↔ food_tags, CASCADE both sides
-- **AI providers: cheapest first** — Groq (free text) → Gemini Flash (free vision) → Anthropic Haiku (fallback)
+- **AI providers: cheapest first** — Groq `openai/gpt-oss-20b` (text, ~$0.08/M tokens) → Gemini Flash 2.5 (vision) → Anthropic Haiku (fallback). Gemini is too slow (~5s) and ignores JSON schema for text tasks.
 - **Soft delete** on foods, meals, food_tags, journal_entries via `deleted_at` timestamp
 - **Diary totals are denormalized** — `diary_entries` stores totals recalculated by `recalcDiaryTotals()` after every food entry change
 - **DB connection is lazy** — `src/lib/db/index.ts` uses a Proxy to defer SQLite connection until first query (prevents build-time lock issues)
@@ -21,6 +21,7 @@
 - Next.js 16 restricts `cookies().set()` to Server Actions and Route Handlers — `getSession()` token refresh fails in server component contexts
 - `staleTimes.static: 0` warning (requires minimum 30) — cosmetic only
 - Next.js 16 deprecated `middleware` in favor of `proxy` — not yet migrated
+- Groq deprecates models without warning — if AI parsing returns 404, check `curl https://api.groq.com/openai/v1/models` for current model IDs
 
 ## API Response Format
 
@@ -36,6 +37,7 @@
 | `src/lib/db/index.ts` | Lazy DB connection |
 | `src/lib/db/helpers.ts` | `recalcDiaryTotals()` shared by diary routes |
 | `src/lib/auth.ts` | Login, signup, logout, getSession, JWT signing |
+| `src/lib/ai-providers.ts` | AI vendor abstraction — Groq (text), Gemini (vision), Anthropic (fallback) |
 | `src/lib/rate-limit.ts` | In-memory rate limiter (login + AI endpoints) |
 | `src/middleware.ts` | Auth guard — checks cookie, redirects to login |
 | `drizzle.config.ts` | Drizzle Kit config |

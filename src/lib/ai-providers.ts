@@ -6,7 +6,7 @@
 //
 // Providers:
 //   anthropic — Claude Haiku (good vision + text, moderate cost)
-//   groq      — Llama models (fast text, very cheap, no vision)
+//   groq      — GPT-OSS-20B (fast text, near-free, no vision)
 //   gemini    — Gemini Flash (good vision + text, free tier available)
 
 export type AITask = 'vision' | 'text';
@@ -80,7 +80,7 @@ function createGroqProvider(): AIProvider {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'llama-3.3-70b-versatile',
+          model: 'openai/gpt-oss-20b',
           messages: [
             { role: 'system', content: systemPrompt },
             { role: 'user', content: text },
