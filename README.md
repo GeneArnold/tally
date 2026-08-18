@@ -86,7 +86,7 @@ AI food parsing is optional — the app works fine without it. If configured, Ta
 
 | Task | Provider | Model | Cost |
 |---|---|---|---|
-| Text parsing | Groq | Llama 3.3 70B | Free |
+| Text parsing | Groq | GPT-OSS-20B | Near-free (~$0.08/M tokens) |
 | Vision (photos) | Google Gemini | 2.5 Flash | Free |
 | Fallback | Anthropic | Haiku 4.5 | ~$0.25/MTok |
 

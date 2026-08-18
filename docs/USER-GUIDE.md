@@ -163,7 +163,7 @@ Search the USDA FoodData Central database — over 400,000 foods with detailed n
 
 ### 4. Barcode Scanner
 
-Use your phone's camera to scan a product's barcode (UPC). Tally looks it up in the USDA database and Open Food Facts. You can also type the barcode number manually.
+Use your phone's camera to scan a product's barcode (UPC). Tally looks it up in the Open Food Facts database. You can also type the barcode number manually.
 
 ### 5. Manual Entry
 

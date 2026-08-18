@@ -163,7 +163,7 @@ Tally uses AI to parse food descriptions and photos into structured nutrition da
 
 ### Provider Priority
 
-1. **Groq** (text only) — free, fast, used for text descriptions
+1. **Groq** (text only) — near-free, fast (`openai/gpt-oss-20b`), used for text descriptions
 2. **Google Gemini** (vision) — free, used for food photos and nutrition labels
 3. **Anthropic Haiku** (fallback) — paid (~$0.25/MTok), used if others are unavailable
 
