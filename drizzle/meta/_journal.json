@@ -8,6 +8,13 @@
       "when": 1783425244100,
       "tag": "0000_aspiring_scrambler",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1787052206938,
+      "tag": "0001_supreme_bastion",
+      "breakpoints": true
     }
   ]
 }

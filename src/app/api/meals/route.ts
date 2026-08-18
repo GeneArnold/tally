@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth';
 import { db, schema } from '@/lib/db';
-import { eq, and, or, isNull } from 'drizzle-orm';
+import { eq, and, isNull } from 'drizzle-orm';
 
 // GET — list user's meals + shared meals, exclude soft-deleted
 export async function GET() {
@@ -9,13 +9,12 @@ export async function GET() {
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   try {
-    // Fetch meals: user's own + shared (userId IS NULL), exclude soft-deleted
     const meals = await db
       .select()
       .from(schema.meals)
       .where(
         and(
-          or(eq(schema.meals.userId, session.user.id), isNull(schema.meals.userId)),
+          eq(schema.meals.userId, session.user.id),
           isNull(schema.meals.deletedAt)
         )
       )

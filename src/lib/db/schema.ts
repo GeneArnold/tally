@@ -46,7 +46,7 @@ export const healthProfiles = sqliteTable('health_profiles', {
 
 export const foods = sqliteTable('foods', {
   id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
-  userId: text('user_id').references(() => users.id, { onDelete: 'cascade' }),
+  userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
   fdcId: integer('fdc_id'),
   description: text('description').notNull(),
   brandOwner: text('brand_owner'),
@@ -180,7 +180,7 @@ export const measurements = sqliteTable('measurements', {
 
 export const meals = sqliteTable('meals', {
   id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
-  userId: text('user_id').references(() => users.id, { onDelete: 'cascade' }),
+  userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
   name: text('name').notNull(),
   description: text('description'),
   defaultMealType: text('default_meal_type'),

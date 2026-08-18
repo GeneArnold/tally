@@ -125,7 +125,7 @@ async function importData() {
   // 4. Insert foods
   const foodInserts = dump.foods.map((food: any) => ({
     id: food.id,
-    userId: food.user_created === DIRECTUS_USER_ID ? NEW_USER_ID : (food.user_created || null),
+    userId: NEW_USER_ID,
     fdcId: food.fdc_id || null,
     description: food.description,
     brandOwner: food.brand_owner || null,
@@ -173,7 +173,7 @@ async function importData() {
   // 6. Insert meals
   const mealInserts = dump.meals.map((meal: any) => ({
     id: meal.id,
-    userId: meal.user === DIRECTUS_USER_ID ? NEW_USER_ID : (meal.user || null),
+    userId: NEW_USER_ID,
     name: meal.name,
     description: meal.description || null,
     defaultMealType: meal.default_meal_type || null,
